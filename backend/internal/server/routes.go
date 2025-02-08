@@ -2,35 +2,35 @@ package server
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+var db *gorm.DB
+
+var (
+    port = os.Getenv("FRONTEND_PORT")
+    app_env = os.Getenv("APP_ENV")
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
-	r := gin.Default()
+    r := gin.Default()
 
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // Add your frontend URL
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
-		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
-		AllowCredentials: true, // Enable cookies/auth
-	}))
+    r.Use(cors.New(cors.Config{
+        AllowOrigins:     []string{"http://localhost:" + port}, // Add your frontend URL
+        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+        AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
+        AllowCredentials: true, // Enable cookies/auth
+    }))
 
-	r.GET("/", s.HelloWorldHandler)
+    v1 := r.Group("/v1")
+    {
+        v1.GET("/auth", s.SignUp)
+    }
 
-	r.GET("/health", s.healthHandler)
 
-	return r
-}
-
-func (s *Server) HelloWorldHandler(c *gin.Context) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	c.JSON(http.StatusOK, resp)
-}
-
-func (s *Server) healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, s.db.Health())
+    return r
 }
