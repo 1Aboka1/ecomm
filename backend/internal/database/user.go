@@ -8,8 +8,8 @@ import (
 )
 
 type DefaultModel struct {
-    ID            uuid.UUID       `gorm:"type:uuid;default:gen_random_uuid()"`
-    CreatedAt     time.Time
+    ID            uuid.UUID       `gorm:"type:uuid;default:gen_random_uuid()";json:"id"`
+    CreatedAt     time.Time       
     UpdatedAt     time.Time
     DeletedAt     *time.Time
 }
@@ -17,11 +17,10 @@ type DefaultModel struct {
 type User struct {
     DefaultModel
 
-    CategoryID              uint    `gorm:index`
-    FirstName      string    `gorm:"size:100"`
+    FirstName      string    `gorm:"size:100";validate:"required"`
     LastName       *string   `gorm:"size:100"`
     PhoneNumber    string    `gorm:"unique;not null;size:12"`
-    Role           uint      `gorm:"not null; default:0"`
+    Role           uint      `gorm:"not null;default:0"`
     AddressLine    string
     City           string
 }
@@ -51,7 +50,7 @@ func GetRoleString(role uint) (string, error) {
     return "", errors.New("invalid role")
 }
 
-func IsPermitted(roleLvl byte, permittedRoles []byte) bool {
+func IsPermitted(roleLvl uint, permittedRoles []uint) bool {
     for _, permittedRole := range permittedRoles {
         if roleLvl >= permittedRole {
             return true

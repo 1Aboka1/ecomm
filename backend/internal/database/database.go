@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"ecomm-backend/internal/database/models"
 	"fmt"
 	"log"
 	"os"
@@ -65,14 +64,14 @@ func New() Service {
     }
 
     OrmDb.AutoMigrate(
-        &models.User{}, 
-        &models.Category{},
-        &models.SubCategory{},
-        &models.Product{},
-        &models.ProductAttribute{},
-        &models.ProductSku{},
-        &models.Order{},
-        &models.OrderItem{},
+        &User{}, 
+        &Category{},
+        &SubCategory{},
+        &Product{},
+        &ProductAttribute{},
+        &ProductSku{},
+        &Order{},
+        &OrderItem{},
     )
 
     return dbInstance
