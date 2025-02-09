@@ -4,6 +4,7 @@ import (
 	"context"
 	"ecomm-backend/internal/auth"
 	"ecomm-backend/internal/database"
+	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -79,15 +80,18 @@ func (s *Server) verifySMS(c *gin.Context) {
 }
 
 func (s *Server) signIn(c *gin.Context) {
+    var user database.User
+    session := sessions.Default(c)
+    err := auth.RetrieveSession(session, &user)
+    log.Println(user)
     // verify that the user passed verification
-    IDClaims, err := VerifyUser(c)
+    IDClaims, err := auth.VerifyUser(c)
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err})
         return
     }
 
     // try to sign in and create session. If error, try to sign up
-    var user database.User
     user.PhoneNumber = IDClaims.PhoneNumber
 
     ok := auth.SignInUser(&user)
@@ -96,20 +100,20 @@ func (s *Server) signIn(c *gin.Context) {
         return
     }
 
-    session := sessions.Default(c)
+    session = sessions.Default(c)
 
-    err = auth.CreateSession(session, &user)
+    sessionId := auth.CreateSession(session, &user)
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err})
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"success": "session created"})
+    c.JSON(http.StatusCreated, gin.H{"sessionId": sessionId})
 }
 
 func (s *Server) signUp(c *gin.Context) {
     // check if user is verified
-    IDClaims, err := VerifyUser(c)
+    IDClaims, err := auth.VerifyUser(c)
     if err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err})
         return

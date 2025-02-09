@@ -1,64 +1,48 @@
 package auth
 
 import (
-	"ecomm-backend/internal/database"
 	"errors"
+	"strings"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/google/uuid"
+	"github.com/gin-gonic/gin"
 )
 
-func CreateSession(session sessions.Session, user *database.User) error {
-    session.Options(sessions.Options{MaxAge: 60 * 60 * 24 * 7 * 2})
-
-    userID, err := user.ID.MarshalText()
+func VerifyUser(c *gin.Context) (*IDClaims, error) {
+    authHeader := c.GetHeader("Authorization")
+    _, IDTokenString, ok := strings.Cut(authHeader, " ")
+    if !ok {
+        err := errors.New("provide correct Authorization header")
+        return nil, err
+    }
+    IDToken, err := verifyIDToken(IDTokenString)
 
     if err != nil {
-        return err
+        return nil, err
     }
-    session.Set("id", userID)
-    session.Set("first_name", user.FirstName)
-    session.Set("last_name", user.LastName)
-    session.Set("phone_number", user.PhoneNumber)
-    session.Set("role", user.Role)
-
-    session.Save()
-    return nil
+    IDClaims, ok := IDToken.Claims.(*IDClaims)
+    if !ok {
+        err := errors.New("couldn't derive claims")
+        return nil, err
+    }
+    return IDClaims, nil
 }
 
-func RetrieveSession(session sessions.Session, user *database.User) error {
-    var newUser database.User
-
-    id, ok := session.Get("id").(uuid.UUID)
-    if !ok {
-        return errors.New("session doesn't have id")
-    }
-    firstName, ok := session.Get("first_name").(string)
-    if !ok {
-        return errors.New("session doesn't have first_name")
-    }
-    lastName, ok := session.Get("last_name").(string)
-    if !ok {
-        return errors.New("session doesn't have last_name")
-    }
-    phoneNumber, ok := session.Get("phone_number").(string)
-    if !ok {
-        return errors.New("session doesn't have phone_number")
-    }
-    role, ok := session.Get("role").(uint)
-    if !ok {
-        return errors.New("session doesn't have role")
-    }
-
-    newUser.ID = id
-    newUser.FirstName = firstName
-    newUser.LastName = &lastName // is it ok?
-    newUser.PhoneNumber = phoneNumber
-    newUser.Role = role
-
-    return nil
-}
-
-func DeleteSession(session sessions.Session) {
-    session.Clear()
-}
+// func VerifySessionToken(c *gin.Context) (*SessionClaims, error) {
+//     authHeader := c.GetHeader("Authorization")
+//     _, sessionTokenString, ok := strings.Cut(authHeader, " ")
+//     if !ok {
+//         err := errors.New("provide correct Authorization header")
+//         return nil, err
+//     }
+//     sessionToken, err := verifySessionToken(sessionTokenString)
+// 
+//     if err != nil {
+//         return nil, err
+//     }
+//     sessionClaims, ok := sessionToken.Claims.(*SessionClaims)
+//     if !ok {
+//         err := errors.New("couldn't derive claims")
+//         return nil, err
+//     }
+//     return sessionClaims, nil
+// }

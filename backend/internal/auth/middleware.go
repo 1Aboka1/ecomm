@@ -2,7 +2,7 @@ package auth
 
 import (
 	"ecomm-backend/internal/database"
-	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -18,14 +18,16 @@ func Authorizer(permittedRoles []uint) gin.HandlerFunc {
         }
 
         var user database.User
+
         session := sessions.Default(c)
         err := RetrieveSession(session, &user)
 
         if err != nil {
-            c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": errors.New("session doesn't exist")})
+            c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
             return
         }
 
+        log.Println(user)
         if database.IsPermitted(user.Role, permittedRoles) {
             c.JSON(http.StatusUnauthorized, gin.H{
                 "error": "unauthorized. Not permitted",
