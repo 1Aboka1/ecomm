@@ -9,6 +9,8 @@ import (
 )
 
 func CreateSession(session sessions.Session, user *database.User) error {
+    session.Options(sessions.Options{MaxAge: 60 * 60 * 24 * 7 * 2})
+
     userID, err := user.ID.MarshalText()
 
     if err != nil {
@@ -19,8 +21,6 @@ func CreateSession(session sessions.Session, user *database.User) error {
     session.Set("last_name", user.LastName)
     session.Set("phone_number", user.PhoneNumber)
     session.Set("role", user.Role)
-    session.Set("address_line", user.AddressLine)
-    session.Set("city", user.City)
 
     session.Save()
     return nil
@@ -49,22 +49,16 @@ func RetrieveSession(session sessions.Session, user *database.User) error {
     if !ok {
         return errors.New("session doesn't have role")
     }
-    addressLine, ok := session.Get("address_line").(string)
-    if !ok {
-        return errors.New("session doesn't have address_line")
-    }
-    city, ok := session.Get("city").(string)
-    if !ok {
-        return errors.New("session doesn't have city")
-    }
 
     newUser.ID = id
     newUser.FirstName = firstName
     newUser.LastName = &lastName // is it ok?
     newUser.PhoneNumber = phoneNumber
     newUser.Role = role
-    newUser.AddressLine = addressLine
-    newUser.City = city
 
     return nil
+}
+
+func DeleteSession(session sessions.Session) {
+    session.Clear()
 }

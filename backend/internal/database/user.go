@@ -17,12 +17,18 @@ type DefaultModel struct {
 type User struct {
     DefaultModel
 
-    FirstName      string    `gorm:"size:100";validate:"required"`
-    LastName       *string   `gorm:"size:100"`
-    PhoneNumber    string    `gorm:"unique;not null;size:12"`
+    FirstName      string    `gorm:"size:100" json:"first_name" binding:"required"`
+    LastName       *string   `gorm:"size:100" json:"last_name" binding:"required"`
+    PhoneNumber    string    `gorm:"unique;not null;size:12" json:"phone_number"`
     Role           uint      `gorm:"not null;default:0"`
-    AddressLine    string
-    City           string
+}
+
+type Address struct {
+    DefaultModel
+
+    AddressLine    string    `json:"address_line";validate:"required"`
+    City           string    `json:"city";validate:"required"`
+    UserID         uuid.UUID `gorm:"index;not null";json:"user_id";validate:"required"`
 }
 
 const (

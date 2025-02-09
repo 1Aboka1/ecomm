@@ -21,9 +21,11 @@ tmp/
 # IDE specific files
 .vscode
 .idea
+.todo
 
 # .env file
 .env
+*.env
 
 # Project build
 main
@@ -32,3 +34,5 @@ main
 # OS X generated file
 .DS_Store
 
+# node_modules
+node_modules

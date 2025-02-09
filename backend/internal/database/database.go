@@ -65,6 +65,7 @@ func New() Service {
 
     OrmDb.AutoMigrate(
         &User{}, 
+        &Address{},
         &Category{},
         &SubCategory{},
         &Product{},

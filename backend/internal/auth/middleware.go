@@ -22,7 +22,7 @@ func Authorizer(permittedRoles []uint) gin.HandlerFunc {
         err := RetrieveSession(session, &user)
 
         if err != nil {
-            c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": errors.New("session doesn't exist")})
+            c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": errors.New("session doesn't exist")})
             return
         }
 

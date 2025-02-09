@@ -17,6 +17,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_SCHEMA: ${DB_SCHEMA}
       GIN_MODE: ${GIN_MODE}
+      REDIS_PORT: ${REDIS_PORT}
     depends_on:
       psql_bp:
         condition: service_healthy
@@ -41,6 +42,36 @@ services:
       start_period: 15s
     networks:
       - network0
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_USER=${REDIS_USER}
+      - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - ./redisdata:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    command: >
+      sh -c '
+      mkdir -p /usr/local/etc/redis &&
+      echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+      echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+      echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+      echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+      echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+      echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+      redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
 
 volumes:
   psql_volume_bp:

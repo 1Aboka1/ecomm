@@ -20,6 +20,7 @@ func SignUpUser(postUser *database.User) error {
     dbUser.FirstName = postUser.FirstName
     dbUser.PhoneNumber = postUser.PhoneNumber
     dbUser.Role = database.Customer
+    dbUser.LastName = postUser.LastName
 
     result := db.Create(&dbUser)
     if errors.Is(result.Error, gorm.ErrModelValueRequired) {

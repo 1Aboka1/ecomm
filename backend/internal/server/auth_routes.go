@@ -90,20 +90,21 @@ func (s *Server) signIn(c *gin.Context) {
     var user database.User
     user.PhoneNumber = IDClaims.PhoneNumber
 
-    if ok := auth.SignInUser(&user); ok {
-        session := sessions.Default(c)
-
-        err = auth.CreateSession(session, &user)
-        if err != nil {
-            c.JSON(http.StatusBadRequest, gin.H{"error": err})
-            return
-        }
-
-        c.JSON(http.StatusOK, gin.H{"success": "session created"})
+    ok := auth.SignInUser(&user)
+    if !ok {
+        c.JSON(http.StatusNotFound, gin.H{"error": "didn't found user. Signup"})
         return
     }
 
-    c.JSON(http.StatusNotFound, gin.H{"error": "didn't found user. Signup"})
+    session := sessions.Default(c)
+
+    err = auth.CreateSession(session, &user)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"success": "session created"})
 }
 
 func (s *Server) signUp(c *gin.Context) {
@@ -132,5 +133,8 @@ func (s *Server) signUp(c *gin.Context) {
 }
 
 func (s *Server) signOut(c * gin.Context) {
+    session := sessions.Default(c)
+    auth.DeleteSession(session)
 
+    c.JSON(http.StatusOK, gin.H{"success": "session removed"})
 }
