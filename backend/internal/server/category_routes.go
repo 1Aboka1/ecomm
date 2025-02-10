@@ -52,7 +52,7 @@ func (s *Server) getCategoryById (c *gin.Context) {
 }
 
 func (s *Server) allSubCategoriesByCategoryId(c *gin.Context) {
-    categoryId := c.Param("id")
+    categoryId := c.Query("id")
     var categories []database.SubCategory
 
     result := db.Select("name", "id", "created_at").Where("category_id = ?", categoryId).Find(&categories)

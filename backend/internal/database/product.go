@@ -7,20 +7,20 @@ import (
 type Product struct {
     DefaultModel
 
-    Name                      string              `json:"name";validate:"required"`
-    Description               string              `json:"description";validate:"required"`
-    Summary                   string              `json:"summary";validate:"required"`
-    Cover                     string              `json:"cover";validate:"required"`
-    SubCategoryID             uuid.UUID            `gorm:index`
+    Name                      string              `json:"name"`
+    Description               string              `json:"description"`
+    Summary                   string              `json:"summary"`
+    Cover                     string              `json:"cover"`
+    SubCategoryID             uuid.UUID            `gorm:"index" json:"sub_category_id"`
 }
 
 type ProductSku struct {
     DefaultModel
 
     ProductID                 uuid.UUID        `gorm:index`
-    Sku                       string
-    Price                     uint
-    Quantity                  uint
+    Sku                       string            `json:"sku"`       
+    Price                     uint              `json:"price"`
+    Quantity                  uint              `json:"quantity"`    
 
     ProductAttributes         []*ProductAttribute    `gorm:"many2many:sku_attributes;"`
 
@@ -31,8 +31,8 @@ type ProductSku struct {
 type ProductAttribute struct {
     DefaultModel
 
-    Type                      string
-    Value                     string
+    Type                      string             `json:"type"`   
+    Value                     string             `json:"value"`
 
     ProductSkus               []*ProductSku    `gorm:"many2many:sku_attributes;"`
 }

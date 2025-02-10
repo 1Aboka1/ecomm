@@ -12,12 +12,12 @@ import (
 func (s *Server) allProducts (c *gin.Context) {
     var products []database.Product
 
-    result := db.Select("name", "description", "summary", "cover", "id", "created_at").Find(&products)
+    result := db.Select("name", "description", "summary", "cover", "id", "created_at", "sub_category_id").Find(&products)
     if result.Error != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
     }
 
-    c.JSON(http.StatusFound, products)
+    c.JSON(http.StatusOK, products)
 }
 
 func (s *Server) newProduct (c *gin.Context) {
@@ -36,7 +36,10 @@ func (s *Server) newProduct (c *gin.Context) {
 }
 
 func (s *Server) getProductById (c *gin.Context) {
-    productId := c.Param("id")
+    productId := c.Query("id")
+    if productId == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "input id of product"})
+    }
     var product database.Product
     
     result := db.Where("id = ?", productId).Take(&product)
@@ -44,5 +47,5 @@ func (s *Server) getProductById (c *gin.Context) {
         c.JSON(http.StatusNotFound, gin.H{"error": gorm.ErrRecordNotFound.Error()})
     }
     
-    c.JSON(http.StatusFound, product)
+    c.JSON(http.StatusOK, product)
 }

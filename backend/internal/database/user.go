@@ -8,10 +8,10 @@ import (
 )
 
 type DefaultModel struct {
-    ID            uuid.UUID       `gorm:"type:uuid;default:gen_random_uuid()";json:"id"`
-    CreatedAt     time.Time       
-    UpdatedAt     time.Time
-    DeletedAt     *time.Time
+    ID            uuid.UUID       `gorm:"type:uuid;default:gen_random_uuid()" json:"id"`
+    CreatedAt     time.Time       `json:"created_at"`
+    UpdatedAt     time.Time       `json:"updated_at"`
+    DeletedAt     *time.Time      `json:"deleted_at"`
 }
 
 type User struct {
@@ -26,9 +26,9 @@ type User struct {
 type Address struct {
     DefaultModel
 
-    AddressLine    string    `json:"address_line";validate:"required"`
-    City           string    `json:"city";validate:"required"`
-    UserID         uuid.UUID `gorm:"index;not null";json:"user_id";validate:"required"`
+    AddressLine    string    `json:"address_line"`
+    City           string    `json:"city"`
+    UserID         uuid.UUID `gorm:"index;not null" json:"user_id"`
 }
 
 const (

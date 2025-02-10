@@ -19,7 +19,7 @@ func SignUpUser(postUser *database.User) error {
 
     dbUser.FirstName = postUser.FirstName
     dbUser.PhoneNumber = postUser.PhoneNumber
-    dbUser.Role = database.Customer
+    dbUser.Role = database.Admin
     dbUser.LastName = postUser.LastName
 
     result := db.Create(&dbUser)

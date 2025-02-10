@@ -13,7 +13,7 @@ type Category struct {
 type SubCategory struct {
     DefaultModel
 
-    CategoryID              uuid.UUID    `gorm:index`
-    Name                    string
-    Description             string
+    CategoryID              uuid.UUID    `gorm:"index" json:"category_id"`
+    Name                    string       `json:"name"`       
+    Description             string       `json:"description"`
 }
