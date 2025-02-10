@@ -61,10 +61,23 @@ func (s *Server) RegisterRoutes() http.Handler {
     {
         productRoute := v1.Group("/product")
         productRoute.GET("/all", allowOnlyCustomerAndGreater, s.allProducts)
-        productRoute.POST("/new_product", allowOnlyAdmin, s.newProduct)
-        productRoute.GET("/:id", allowEveryone, s.getProductById)
+        productRoute.POST("/new", allowOnlyAdmin, s.newProduct)
+        productRoute.GET("/by_id", allowEveryone, s.getProductById)
     }
 
+    {
+        categoryRoute := v1.Group("/category")
+        categoryRoute.GET("/all", allowOnlyCustomerAndGreater, s.allCategories)
+        categoryRoute.POST("/new", allowOnlyAdmin, s.newCategory)
+        categoryRoute.GET("/by_id", allowEveryone, s.getCategoryById)
+    }
+
+    {
+        subCategoryRoute := v1.Group("/sub_category")
+        subCategoryRoute.GET("/all", allowOnlyCustomerAndGreater, s.allSubCategoriesByCategoryId)
+        subCategoryRoute.POST("/new", allowOnlyAdmin, s.newSubCategory)
+        subCategoryRoute.GET("/by_id", allowEveryone, s.getSubCategoryById)
+    }
 
     return r
 }

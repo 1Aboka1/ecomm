@@ -4,7 +4,6 @@ import (
 	"context"
 	"ecomm-backend/internal/auth"
 	"ecomm-backend/internal/database"
-	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -83,7 +82,6 @@ func (s *Server) signIn(c *gin.Context) {
     var user database.User
     session := sessions.Default(c)
     err := auth.RetrieveSession(session, &user)
-    log.Println(user)
     // verify that the user passed verification
     IDClaims, err := auth.VerifyUser(c)
     if err != nil {

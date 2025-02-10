@@ -17,7 +17,7 @@ func (s *Server) allCategories (c *gin.Context) {
         c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
     }
 
-    c.JSON(http.StatusFound, categories)
+    c.JSON(http.StatusOK, categories)
 }
 
 func (s *Server) newCategory (c *gin.Context) {
@@ -48,10 +48,10 @@ func (s *Server) getCategoryById (c *gin.Context) {
         c.JSON(http.StatusNotFound, gin.H{"error": gorm.ErrRecordNotFound.Error()})
     }
     
-    c.JSON(http.StatusFound, category)
+    c.JSON(http.StatusOK, category)
 }
 
-func (s *Server) allSubCategoriesInCategoryById (c *gin.Context) {
+func (s *Server) allSubCategoriesByCategoryId(c *gin.Context) {
     categoryId := c.Param("id")
     var categories []database.SubCategory
 
@@ -60,7 +60,7 @@ func (s *Server) allSubCategoriesInCategoryById (c *gin.Context) {
         c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
     }
 
-    c.JSON(http.StatusFound, categories)
+    c.JSON(http.StatusOK, categories)
 }
 
 func (s *Server) newSubCategory (c *gin.Context) {
@@ -81,15 +81,15 @@ func (s *Server) newSubCategory (c *gin.Context) {
 func (s *Server) getSubCategoryById (c *gin.Context) {
     categoryId, ok := c.GetQuery("id")
     if !ok {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "input id of category"})
+        c.JSON(http.StatusBadRequest, gin.H{"error": "input id of subcategory"})
         return
     }
-    var category database.Category
+    var category database.SubCategory
     
     result := db.Where("id = ?", categoryId).Take(&category)
     if errors.Is(result.Error, gorm.ErrRecordNotFound) {
         c.JSON(http.StatusNotFound, gin.H{"error": gorm.ErrRecordNotFound.Error()})
     }
     
-    c.JSON(http.StatusFound, category)
+    c.JSON(http.StatusOK, category)
 }
