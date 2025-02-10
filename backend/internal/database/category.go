@@ -2,14 +2,13 @@ package database
 
 import (
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type Category struct {
-    gorm.Model
-    Name        string
-    Description string
-}
+    DefaultModel                      
+    Name        string                `json:"name";validate:"required"`       
+    Description string                `json:"description";validate:"required"`
+}                                     
 
 type SubCategory struct {
     DefaultModel

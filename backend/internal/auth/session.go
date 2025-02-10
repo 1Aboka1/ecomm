@@ -3,7 +3,6 @@ package auth
 import (
 	"ecomm-backend/internal/database"
 	"errors"
-	_ "log"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/google/uuid"

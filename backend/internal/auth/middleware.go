@@ -2,7 +2,6 @@ package auth
 
 import (
 	"ecomm-backend/internal/database"
-	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -27,8 +26,11 @@ func Authorizer(permittedRoles []uint) gin.HandlerFunc {
             return
         }
 
-        log.Println(user)
-        if database.IsPermitted(user.Role, permittedRoles) {
+        if user.ID.String() == "00000000-0000-0000-0000-000000000000" {
+            c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "no user found"})
+            return
+        }
+        if !database.IsPermitted(user.Role, permittedRoles) {
             c.JSON(http.StatusUnauthorized, gin.H{
                 "error": "unauthorized. Not permitted",
             })

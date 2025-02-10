@@ -15,11 +15,6 @@ type IDClaims struct {
     jwt.RegisteredClaims
 }
 
-// type SessionClaims struct {
-//     id                    uuid.UUID     `json:user_id`
-//     jwt.RegisteredClaims
-// }
-
 func CreateIDToken(phoneNumber string) (string, error) {
     claims := IDClaims{
         phoneNumber,
@@ -52,35 +47,3 @@ func verifyIDToken(tokenString string) (*jwt.Token, error) {
 
     return token, nil
 }
-
-// func CreateSessionToken(id uuid.UUID) (string, error) {
-//     claims := SessionClaims{
-//         id,
-//         jwt.RegisteredClaims{
-//             ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 60 * 24 * 7 * 2)),
-//         },
-//     }
-//     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-// 
-//     tokenString, err := token.SignedString(secretKey)
-//     if err != nil {
-//         return "", err
-//     }
-// 
-//     return tokenString, nil
-// }
-// 
-// func verifySessionToken(tokenString string) (*jwt.Token, error) {
-//     var claimsSession SessionClaims
-//     _ = tokenString
-// 
-//     token, err := jwt.ParseWithClaims(tokenString, &claimsSession, func(token *jwt.Token) (interface{}, error) {
-//         return secretKey, nil
-//     })
-// 
-//     if err != nil || !token.Valid {
-//         return nil, err
-//     }
-// 
-//     return token, nil
-// }

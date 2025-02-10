@@ -7,10 +7,10 @@ import (
 type Product struct {
     DefaultModel
 
-    Name                      string
-    Description               string
-    Summary                   string
-    Cover                     string              // I guess it's a picture?
+    Name                      string              `json:"name";validate:"required"`
+    Description               string              `json:"description";validate:"required"`
+    Summary                   string              `json:"summary";validate:"required"`
+    Cover                     string              `json:"cover";validate:"required"`
     SubCategoryID             uuid.UUID            `gorm:index`
 }
 

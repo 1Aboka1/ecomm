@@ -27,10 +27,13 @@ var (
     allowOnlyAdmin = auth.Authorizer([]uint{database.Admin})
     allowOnlyCustomerAndGreater = auth.Authorizer([]uint{database.Customer, database.Admin})
     allowOnlyGuest = auth.Authorizer([]uint{database.Guest})
+    allowEveryone = auth.Authorizer([]uint{database.Guest, database.Admin, database.Customer})
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
     r := gin.Default()
+
+    db = database.OrmDb
 
     store, _ := redis.NewStore(10, "tcp", "localhost:" + redisPort, "", []byte("secret"))
     r.Use(sessions.Sessions("session0", store))
@@ -58,6 +61,8 @@ func (s *Server) RegisterRoutes() http.Handler {
     {
         productRoute := v1.Group("/product")
         productRoute.GET("/all", allowOnlyCustomerAndGreater, s.allProducts)
+        productRoute.POST("/new_product", allowOnlyAdmin, s.newProduct)
+        productRoute.GET("/:id", allowEveryone, s.getProductById)
     }
 
 
