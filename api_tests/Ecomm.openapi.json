@@ -1,0 +1,975 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Ecomm",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/host/v1/auth/send_otp": {
+      "post": {
+        "summary": "Send OTP",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone_number": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "phone_number"
+                ]
+              },
+              "example": {
+                "phone_number": "+77776134709"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/auth/sign_up": {
+      "post": {
+        "summary": "Sign up",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "type": "string"
+                  },
+                  "deleted_at": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                },
+                "required": [
+                  "first_name",
+                  "last_name",
+                  "created_at",
+                  "updated_at",
+                  "deleted_at"
+                ]
+              },
+              "example": {
+                "first_name": "Jermaine",
+                "last_name": "Hahn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/host/v1/auth/verify_otp": {
+      "post": {
+        "summary": "Verify OTP",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone_number": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "phone_number",
+                  "code"
+                ]
+              },
+              "example": {
+                "phone_number": "+77776134709",
+                "code": "445507"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "token"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/auth/sign_in": {
+      "post": {
+        "summary": "Sign in",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/host/v1/product/all": {
+      "get": {
+        "summary": "All products",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "session0",
+            "in": "cookie",
+            "description": "",
+            "required": false,
+            "example": "MTczOTExNjk0MXxOd3dBTkZGVVNqVXlWRWMyU2s4MlRVcFJSMUZVUlU1RVJ6SlBURTlJVWxCTlZUVlROMGcyUmxrMlF6UllORnBGV2xnMFNGcFBSa0U9fMx5c_FbSMC83MaM94eVMDY5u-UrHygCpQCMJrQoDre0",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "ID"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "deleted_at": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "name"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "summary": {
+                        "type": "string"
+                      },
+                      "cover": {
+                        "type": "string"
+                      },
+                      "sub_category_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "created_at",
+                      "updated_at",
+                      "deleted_at",
+                      "name",
+                      "description",
+                      "summary",
+                      "cover",
+                      "sub_category_id"
+                    ]
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/product/by_id": {
+      "get": {
+        "summary": "Get product by ID",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "session0",
+            "in": "cookie",
+            "description": "",
+            "required": false,
+            "example": "MTczOTExNjk0MXxOd3dBTkZGVVNqVXlWRWMyU2s4MlRVcFJSMUZVUlU1RVJ6SlBURTlJVWxCTlZUVlROMGcyUmxrMlF6UllORnBGV2xnMFNGcFBSa0U9fMx5c_FbSMC83MaM94eVMDY5u-UrHygCpQCMJrQoDre0",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "deleted_at": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "name"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "summary": {
+                      "type": "string"
+                    },
+                    "cover": {
+                      "type": "string"
+                    },
+                    "sub_category_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "name",
+                    "description",
+                    "summary",
+                    "cover",
+                    "sub_category_id"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/product/new": {
+      "post": {
+        "summary": "New product",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "summary": {
+                    "type": "string"
+                  },
+                  "cover": {
+                    "type": "string"
+                  },
+                  "sub_category_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description",
+                  "summary",
+                  "cover",
+                  "sub_category_id"
+                ]
+              },
+              "example": {
+                "name": "quae sapiente amet",
+                "description": "Atque reiciendis totam qui. Atque facilis occaecati veniam quod exercitationem molestias. Odio quae deserunt aliquam error est unde quae dolores voluptas. Quod reprehenderit ipsam ullam. Velit odit debitis expedita officia. Similique dolorum rerum deleniti officiis error.",
+                "summary": "minim qui exercitation ea dolor",
+                "cover": "sunt anim ipsum ea",
+                "sub_category_id": "aliqua irure sit amet pariatur"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/category/all": {
+      "get": {
+        "summary": "All categories",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "session0",
+            "in": "cookie",
+            "description": "",
+            "required": false,
+            "example": "MTczOTExNjk0MXxOd3dBTkZGVVNqVXlWRWMyU2s4MlRVcFJSMUZVUlU1RVJ6SlBURTlJVWxCTlZUVlROMGcyUmxrMlF6UllORnBGV2xnMFNGcFBSa0U9fMx5c_FbSMC83MaM94eVMDY5u-UrHygCpQCMJrQoDre0",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "ID"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "deleted_at": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "created_at",
+                      "updated_at",
+                      "deleted_at",
+                      "name",
+                      "description"
+                    ]
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/category/new": {
+      "post": {
+        "summary": "New category",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              },
+              "example": {
+                "name": "quae sapiente amet",
+                "description": "Atque reiciendis totam qui. Atque facilis occaecati veniam quod exercitationem molestias. Odio quae deserunt aliquam error est unde quae dolores voluptas. Quod reprehenderit ipsam ullam. Velit odit debitis expedita officia. Similique dolorum rerum deleniti officiis error."
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/category/by_id": {
+      "get": {
+        "summary": "Get category by ID",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "session0",
+            "in": "cookie",
+            "description": "",
+            "required": false,
+            "example": "MTczOTExNjk0MXxOd3dBTkZGVVNqVXlWRWMyU2s4MlRVcFJSMUZVUlU1RVJ6SlBURTlJVWxCTlZUVlROMGcyUmxrMlF6UllORnBGV2xnMFNGcFBSa0U9fMx5c_FbSMC83MaM94eVMDY5u-UrHygCpQCMJrQoDre0",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "deleted_at": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "name",
+                    "description"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/sub_category/all": {
+      "get": {
+        "summary": "All subcategories by category id",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "session0",
+            "in": "cookie",
+            "description": "",
+            "required": false,
+            "example": "MTczOTExNjk0MXxOd3dBTkZGVVNqVXlWRWMyU2s4MlRVcFJSMUZVUlU1RVJ6SlBURTlJVWxCTlZUVlROMGcyUmxrMlF6UllORnBGV2xnMFNGcFBSa0U9fMx5c_FbSMC83MaM94eVMDY5u-UrHygCpQCMJrQoDre0",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "ID"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "deleted_at": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "created_at",
+                      "updated_at",
+                      "deleted_at",
+                      "name",
+                      "description"
+                    ]
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/sub_category/new": {
+      "post": {
+        "summary": "New subcategory",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "category_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description",
+                  "category_id"
+                ]
+              },
+              "example": {
+                "name": "quae sapiente amet",
+                "description": "Atque reiciendis totam qui. Atque facilis occaecati veniam quod exercitationem molestias. Odio quae deserunt aliquam error est unde quae dolores voluptas. Quod reprehenderit ipsam ullam. Velit odit debitis expedita officia. Similique dolorum rerum deleniti officiis error.",
+                "category_id": "occaecat consectetur aliqua"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/host/v1/sub_category/by_id": {
+      "get": {
+        "summary": "Get subcategory by ID",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "session0",
+            "in": "cookie",
+            "description": "",
+            "required": false,
+            "example": "MTczOTExNjk0MXxOd3dBTkZGVVNqVXlWRWMyU2s4MlRVcFJSMUZVUlU1RVJ6SlBURTlJVWxCTlZUVlROMGcyUmxrMlF6UllORnBGV2xnMFNGcFBSa0U9fMx5c_FbSMC83MaM94eVMDY5u-UrHygCpQCMJrQoDre0",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "deleted_at": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "name",
+                    "description"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "deleted_at": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "first_name",
+          "last_name",
+          "phone_number",
+          "role",
+          "created_at",
+          "updated_at",
+          "deleted_at"
+        ]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "deleted_at": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "description": "name"
+          },
+          "description": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "cover": {
+            "type": "string"
+          },
+          "sub_category_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "name",
+          "description",
+          "summary",
+          "cover",
+          "sub_category_id"
+        ]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "deleted_at": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "name",
+          "description"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "",
+      "description": "Develop Env"
+    }
+  ],
+  "security": {}
+}
