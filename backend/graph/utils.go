@@ -3,19 +3,19 @@ package graph
 import (
 	"ecomm-backend/graph/model"
 	"ecomm-backend/internal/database"
-	"time"
 )
 
 func dbToGQLModel(category *database.Category) *model.Category {
     createdAt := category.CreatedAt.String()
     updatedAt := category.UpdatedAt.String()
 
-    var deletedAt string
+    var deletedAt *string
     if category.DeletedAt == nil {
         // TODO: this SHOULDN'T BE Now()
-        deletedAt = time.Now().String()
+        deletedAt = nil
     } else {
-        deletedAt = category.DeletedAt.String()
+        deletedAtString := category.DeletedAt.String()
+        deletedAt = &deletedAtString
     }
 
     categoryGQL := &model.Category{ 
