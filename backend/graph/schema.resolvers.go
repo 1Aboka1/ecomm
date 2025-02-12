@@ -8,6 +8,8 @@ import (
 	"context"
 	"ecomm-backend/graph/model"
 	"ecomm-backend/internal/database"
+
+	"github.com/google/uuid"
 )
 
 // CreateCategory is the resolver for the createCategory field.
@@ -19,7 +21,7 @@ func (r *mutationResolver) CreateCategory(ctx context.Context, input model.Categ
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	categoryGQL := dbToGQLModel(category)
+	categoryGQL := toCategoryGQL(category)
 	return categoryGQL, nil
 }
 
@@ -37,7 +39,43 @@ func (r *mutationResolver) RemoveCategory(ctx context.Context, input model.Delet
 		return nil, result.Error
 	}
 
-	categoryGQL := dbToGQLModel(&category)
+	categoryGQL := toCategoryGQL(&category)
+	return categoryGQL, nil
+}
+
+// CreateSubCategory is the resolver for the createSubCategory field.
+func (r *mutationResolver) CreateSubCategory(ctx context.Context, input model.SubCategoryInput) (*model.SubCategory, error) {
+	db := database.OrmDb
+  category_id, err := uuid.Parse(input.CategoryID)
+  if err != nil {
+      return nil, err
+  }
+
+  category := &database.SubCategory{ Name: input.Name, Description: input.Description, CategoryID: category_id }
+
+	result := db.Create(&category)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	categoryGQL := toSubCategoryGQL(category)
+	return categoryGQL, nil
+}
+
+// RemoveSubCategory is the resolver for the removeSubCategory field.
+func (r *mutationResolver) RemoveSubCategory(ctx context.Context, input model.DeleteSubCategoryInput) (*model.SubCategory, error) {
+	db := database.OrmDb
+	var category database.SubCategory
+	result := db.Where("id = ?", input.ID).Take(&category)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	result = db.Where("id = ?", input.ID).Delete(database.SubCategory{})
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	categoryGQL := toSubCategoryGQL(&category)
 	return categoryGQL, nil
 }
 
@@ -46,14 +84,14 @@ func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, erro
 	db := database.OrmDb
 	var categories []database.Category
 
-	result := db.Select("id", "name", "created_at").Find(&categories)
+	result := db.Select("id", "name", "created_at", "updated_at", "deleted_at", "description").Find(&categories)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
 	var categoriesGQL []*model.Category
 	for _, category := range categories {
-		categoriesGQL = append(categoriesGQL, dbToGQLModel(&category))
+		categoriesGQL = append(categoriesGQL, toCategoryGQL(&category))
 	}
 	return categoriesGQL, nil
 }
@@ -67,7 +105,37 @@ func (r *queryResolver) Category(ctx context.Context, id string) (*model.Categor
 		return nil, result.Error
 	}
 
-	categoryGQL := dbToGQLModel(&category)
+	categoryGQL := toCategoryGQL(&category)
+	return categoryGQL, nil
+}
+
+// Subcategories is the resolver for the subcategories field.
+func (r *queryResolver) Subcategories(ctx context.Context, categoryID string) ([]*model.SubCategory, error) {
+	db := database.OrmDb
+	var categories []database.SubCategory
+
+	result := db.Where("category_id = ?", categoryID).Select("id", "name", "created_at", "updated_at", "deleted_at", "description").Find(&categories)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var categoriesGQL []*model.SubCategory
+	for _, category := range categories {
+		categoriesGQL = append(categoriesGQL, toSubCategoryGQL(&category))
+	}
+	return categoriesGQL, nil
+}
+
+// Subcategory is the resolver for the subcategory field.
+func (r *queryResolver) Subcategory(ctx context.Context, id string) (*model.SubCategory, error) {
+	db := database.OrmDb
+	var category database.SubCategory
+	result := db.Where("id = ?", id).Take(&category)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	categoryGQL := toSubCategoryGQL(&category)
 	return categoryGQL, nil
 }
 
