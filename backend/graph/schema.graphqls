@@ -1,39 +1,74 @@
 type Category {
-    id: String!
-    name: String!
-    description: String!
-    created_at: String!
-    updated_at: String!
-    deleted_at: String
-}
-
-input CategoryInput {
-    name: String!
-    description: String!
-}
-
-input DeleteCategoryInput {
-    id: String!
+  id: String!
+  name: String!
+  description: String!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
 }
 
 type SubCategory {
-    id: String!
-    name: String!
-    description: String!
-    created_at: String!
-    updated_at: String!
-    deleted_at: String
-    category_id: String!
+  id: String!
+  name: String!
+  description: String!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
+  category_id: String!
+}
+
+type Product {
+  id: String!
+  name: String!
+  description: String!
+  summary: String!
+  cover: String!
+  sub_category_id: String!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
+}
+
+type Cart {
+  total: Int!,
+  cart_items: [CartItem]!,
+}
+
+type CartItem {
+  product_id: String!,
+  product_sku: String!,
+  quantity: Int!,
+}
+
+input CategoryInput {
+  name: String!
+  description: String!
+}
+
+input DeleteCategoryInput {
+  id: String!
 }
 
 input SubCategoryInput {
-    name: String!
-    description: String!
-    category_id: String!
+  name: String!
+  description: String!
+  category_id: String!
 }
 
 input DeleteSubCategoryInput {
-    id: String!
+  id: String!
+}
+
+input ProductInput {
+  name: String!
+  description: String!
+  summary: String!
+  cover: String!
+  sub_category_id: String!
+}
+
+input DeleteProductInput {
+  id: String!
 }
 
 type Mutation {
@@ -41,6 +76,8 @@ type Mutation {
     removeCategory(input: DeleteCategoryInput!): Category!
     createSubCategory(input: SubCategoryInput!): SubCategory!
     removeSubCategory(input: DeleteSubCategoryInput!): SubCategory!
+    createProduct(input: ProductInput!): Product!
+    removeProduct(input: DeleteProductInput!): Product!
 }
 
 type Query {
@@ -48,6 +85,7 @@ type Query {
     category(id: String!): Category
     subcategories(category_id: String!): [SubCategory!]!
     subcategory(id: String!): SubCategory
+    products(sub_category_id: String): [Product!]!
+    product(id: String!): Product
+    cart: Cart!
 }
-
-

@@ -8,8 +8,12 @@ import (
 	"context"
 	"ecomm-backend/graph/model"
 	"ecomm-backend/internal/database"
+	"errors"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // CreateCategory is the resolver for the createCategory field.
@@ -46,12 +50,12 @@ func (r *mutationResolver) RemoveCategory(ctx context.Context, input model.Delet
 // CreateSubCategory is the resolver for the createSubCategory field.
 func (r *mutationResolver) CreateSubCategory(ctx context.Context, input model.SubCategoryInput) (*model.SubCategory, error) {
 	db := database.OrmDb
-  category_id, err := uuid.Parse(input.CategoryID)
-  if err != nil {
-      return nil, err
-  }
+	category_id, err := uuid.Parse(input.CategoryID)
+	if err != nil {
+		return nil, err
+	}
 
-  category := &database.SubCategory{ Name: input.Name, Description: input.Description, CategoryID: category_id }
+	category := &database.SubCategory{Name: input.Name, Description: input.Description, CategoryID: category_id}
 
 	result := db.Create(&category)
 	if result.Error != nil {
@@ -77,6 +81,43 @@ func (r *mutationResolver) RemoveSubCategory(ctx context.Context, input model.De
 
 	categoryGQL := toSubCategoryGQL(&category)
 	return categoryGQL, nil
+}
+
+// CreateProduct is the resolver for the createProduct field.
+func (r *mutationResolver) CreateProduct(ctx context.Context, input model.ProductInput) (*model.Product, error) {
+	db := database.OrmDb
+
+	sub_category_id, err := uuid.Parse(input.SubCategoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	product := &database.Product{Name: input.Name, Description: input.Description, Summary: input.Summary, Cover: input.Cover, SubCategoryID: sub_category_id}
+
+	result := db.Create(&product)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	productGQL := toProductGQL(product)
+	return productGQL, nil
+}
+
+// RemoveProduct is the resolver for the removeProduct field.
+func (r *mutationResolver) RemoveProduct(ctx context.Context, input model.DeleteProductInput) (*model.Product, error) {
+	db := database.OrmDb
+	var product database.Product
+	result := db.Where("id = ?", input.ID).Take(&product)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	result = db.Where("id = ?", input.ID).Delete(database.Product{})
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	productGQL := toProductGQL(&product)
+	return productGQL, nil
 }
 
 // Categories is the resolver for the categories field.
@@ -137,6 +178,57 @@ func (r *queryResolver) Subcategory(ctx context.Context, id string) (*model.SubC
 
 	categoryGQL := toSubCategoryGQL(&category)
 	return categoryGQL, nil
+}
+
+// Products is the resolver for the products field.
+func (r *queryResolver) Products(ctx context.Context, subCategoryID *string) ([]*model.Product, error) {
+	db := database.OrmDb
+	var products []database.Product
+	var result *gorm.DB
+
+	if subCategoryID != nil {
+		result = db.Where("sub_category_id = ?", *subCategoryID).Select("id", "name", "created_at", "updated_at", "deleted_at", "description", "summary", "cover").Find(&products)
+	} else {
+		result = db.Select("id", "name", "created_at", "updated_at", "deleted_at", "description", "summary", "cover").Find(&products)
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var productsGQL []*model.Product
+	for _, product := range products {
+		productsGQL = append(productsGQL, toProductGQL(&product))
+	}
+	return productsGQL, nil
+}
+
+// Product is the resolver for the product field.
+func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product, error) {
+	db := database.OrmDb
+	var product database.Product
+	result := db.Where("id = ?", id).Take(&product)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	productGQL := toProductGQL(&product)
+	return productGQL, nil
+}
+
+// Cart is the resolver for the cart field.
+func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
+	c, ok := ctx.(*gin.Context)
+	if !ok {
+		return nil, errors.New("no context")
+	}
+  // TODO: needs to be completed
+	session := sessions.Default(c)
+	var cart model.Cart
+	err := RetrieveCartSession(session, &cart)
+	if err != nil {
+		return nil, errors.New("no cart session")
+	}
+	return &cart, nil
 }
 
 // Mutation returns MutationResolver implementation.

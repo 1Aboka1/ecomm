@@ -1,11 +1,11 @@
 package auth
 
 import (
-	"ecomm-backend/internal/database"
-	"net/http"
+    "ecomm-backend/internal/database"
+    "net/http"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
+    "github.com/gin-contrib/sessions"
+    "github.com/gin-gonic/gin"
 )
 
 func Authorizer(permittedRoles []uint) gin.HandlerFunc {

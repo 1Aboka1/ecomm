@@ -2,6 +2,17 @@
 
 package model
 
+type Cart struct {
+	Total     int32       `json:"total"`
+	CartItems []*CartItem `json:"cart_items"`
+}
+
+type CartItem struct {
+	ProductID  string `json:"product_id"`
+	ProductSku string `json:"product_sku"`
+	Quantity   int32  `json:"quantity"`
+}
+
 type Category struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
@@ -20,11 +31,35 @@ type DeleteCategoryInput struct {
 	ID string `json:"id"`
 }
 
+type DeleteProductInput struct {
+	ID string `json:"id"`
+}
+
 type DeleteSubCategoryInput struct {
 	ID string `json:"id"`
 }
 
 type Mutation struct {
+}
+
+type Product struct {
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	Description   string  `json:"description"`
+	Summary       string  `json:"summary"`
+	Cover         string  `json:"cover"`
+	SubCategoryID string  `json:"sub_category_id"`
+	CreatedAt     string  `json:"created_at"`
+	UpdatedAt     string  `json:"updated_at"`
+	DeletedAt     *string `json:"deleted_at,omitempty"`
+}
+
+type ProductInput struct {
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	Summary       string `json:"summary"`
+	Cover         string `json:"cover"`
+	SubCategoryID string `json:"sub_category_id"`
 }
 
 type Query struct {
