@@ -68,12 +68,15 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateCategory    func(childComplexity int, input model.CategoryInput) int
-		CreateProduct     func(childComplexity int, input model.ProductInput) int
-		CreateSubCategory func(childComplexity int, input model.SubCategoryInput) int
-		RemoveCategory    func(childComplexity int, input model.DeleteCategoryInput) int
-		RemoveProduct     func(childComplexity int, input model.DeleteProductInput) int
-		RemoveSubCategory func(childComplexity int, input model.DeleteSubCategoryInput) int
+		AddCartItem            func(childComplexity int, input model.CartItemInput) int
+		ChangeCartItemQuantity func(childComplexity int, input model.CartItemInput) int
+		CreateCategory         func(childComplexity int, input model.CategoryInput) int
+		CreateProduct          func(childComplexity int, input model.ProductInput) int
+		CreateSubCategory      func(childComplexity int, input model.SubCategoryInput) int
+		DeleteCartItem         func(childComplexity int, input model.DeleteCartItemInput) int
+		RemoveCategory         func(childComplexity int, input model.DeleteCategoryInput) int
+		RemoveProduct          func(childComplexity int, input model.DeleteProductInput) int
+		RemoveSubCategory      func(childComplexity int, input model.DeleteSubCategoryInput) int
 	}
 
 	Product struct {
@@ -116,6 +119,9 @@ type MutationResolver interface {
 	RemoveSubCategory(ctx context.Context, input model.DeleteSubCategoryInput) (*model.SubCategory, error)
 	CreateProduct(ctx context.Context, input model.ProductInput) (*model.Product, error)
 	RemoveProduct(ctx context.Context, input model.DeleteProductInput) (*model.Product, error)
+	AddCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error)
+	DeleteCartItem(ctx context.Context, input model.DeleteCartItemInput) (*model.Cart, error)
+	ChangeCartItemQuantity(ctx context.Context, input model.CartItemInput) (*model.Cart, error)
 }
 type QueryResolver interface {
 	Categories(ctx context.Context) ([]*model.Category, error)
@@ -223,6 +229,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Category.UpdatedAt(childComplexity), true
 
+	case "Mutation.addCartItem":
+		if e.complexity.Mutation.AddCartItem == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addCartItem_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddCartItem(childComplexity, args["input"].(model.CartItemInput)), true
+
+	case "Mutation.changeCartItemQuantity":
+		if e.complexity.Mutation.ChangeCartItemQuantity == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_changeCartItemQuantity_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ChangeCartItemQuantity(childComplexity, args["input"].(model.CartItemInput)), true
+
 	case "Mutation.createCategory":
 		if e.complexity.Mutation.CreateCategory == nil {
 			break
@@ -258,6 +288,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateSubCategory(childComplexity, args["input"].(model.SubCategoryInput)), true
+
+	case "Mutation.deleteCartItem":
+		if e.complexity.Mutation.DeleteCartItem == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteCartItem_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteCartItem(childComplexity, args["input"].(model.DeleteCartItemInput)), true
 
 	case "Mutation.removeCategory":
 		if e.complexity.Mutation.RemoveCategory == nil {
@@ -489,7 +531,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputCartItemInput,
 		ec.unmarshalInputCategoryInput,
+		ec.unmarshalInputDeleteCartItemInput,
 		ec.unmarshalInputDeleteCategoryInput,
 		ec.unmarshalInputDeleteProductInput,
 		ec.unmarshalInputDeleteSubCategoryInput,
@@ -611,6 +655,52 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_addCartItem_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_addCartItem_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_addCartItem_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.CartItemInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNCartItemInput2ecommᚑbackendᚋgraphᚋmodelᚐCartItemInput(ctx, tmp)
+	}
+
+	var zeroVal model.CartItemInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_changeCartItemQuantity_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_changeCartItemQuantity_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_changeCartItemQuantity_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.CartItemInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNCartItemInput2ecommᚑbackendᚋgraphᚋmodelᚐCartItemInput(ctx, tmp)
+	}
+
+	var zeroVal model.CartItemInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -677,6 +767,29 @@ func (ec *executionContext) field_Mutation_createSubCategory_argsInput(
 	}
 
 	var zeroVal model.SubCategoryInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteCartItem_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_deleteCartItem_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_deleteCartItem_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.DeleteCartItemInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNDeleteCartItemInput2ecommᚑbackendᚋgraphᚋmodelᚐDeleteCartItemInput(ctx, tmp)
+	}
+
+	var zeroVal model.DeleteCartItemInput
 	return zeroVal, nil
 }
 
@@ -1900,6 +2013,189 @@ func (ec *executionContext) fieldContext_Mutation_removeProduct(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_removeProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addCartItem(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addCartItem(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddCartItem(rctx, fc.Args["input"].(model.CartItemInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Cart)
+	fc.Result = res
+	return ec.marshalNCart2ᚖecommᚑbackendᚋgraphᚋmodelᚐCart(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addCartItem(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "total":
+				return ec.fieldContext_Cart_total(ctx, field)
+			case "cart_items":
+				return ec.fieldContext_Cart_cart_items(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Cart", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addCartItem_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteCartItem(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteCartItem(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteCartItem(rctx, fc.Args["input"].(model.DeleteCartItemInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Cart)
+	fc.Result = res
+	return ec.marshalNCart2ᚖecommᚑbackendᚋgraphᚋmodelᚐCart(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteCartItem(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "total":
+				return ec.fieldContext_Cart_total(ctx, field)
+			case "cart_items":
+				return ec.fieldContext_Cart_cart_items(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Cart", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteCartItem_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_changeCartItemQuantity(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_changeCartItemQuantity(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ChangeCartItemQuantity(rctx, fc.Args["input"].(model.CartItemInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Cart)
+	fc.Result = res
+	return ec.marshalNCart2ᚖecommᚑbackendᚋgraphᚋmodelᚐCart(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_changeCartItemQuantity(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "total":
+				return ec.fieldContext_Cart_total(ctx, field)
+			case "cart_items":
+				return ec.fieldContext_Cart_cart_items(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Cart", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_changeCartItemQuantity_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5146,6 +5442,47 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCartItemInput(ctx context.Context, obj any) (model.CartItemInput, error) {
+	var it model.CartItemInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"product_id", "product_sku", "quantity"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "product_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_id"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductID = data
+		case "product_sku":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_sku"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductSku = data
+		case "quantity":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quantity"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Quantity = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCategoryInput(ctx context.Context, obj any) (model.CategoryInput, error) {
 	var it model.CategoryInput
 	asMap := map[string]any{}
@@ -5174,6 +5511,40 @@ func (ec *executionContext) unmarshalInputCategoryInput(ctx context.Context, obj
 				return it, err
 			}
 			it.Description = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDeleteCartItemInput(ctx context.Context, obj any) (model.DeleteCartItemInput, error) {
+	var it model.DeleteCartItemInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"product_id", "product_sku"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "product_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_id"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductID = data
+		case "product_sku":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_sku"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductSku = data
 		}
 	}
 
@@ -5576,6 +5947,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "removeProduct":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_removeProduct(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addCartItem":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addCartItem(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteCartItem":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteCartItem(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "changeCartItemQuantity":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_changeCartItemQuantity(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6342,6 +6734,11 @@ func (ec *executionContext) marshalNCartItem2ᚕᚖecommᚑbackendᚋgraphᚋmod
 	return ret
 }
 
+func (ec *executionContext) unmarshalNCartItemInput2ecommᚑbackendᚋgraphᚋmodelᚐCartItemInput(ctx context.Context, v any) (model.CartItemInput, error) {
+	res, err := ec.unmarshalInputCartItemInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNCategory2ecommᚑbackendᚋgraphᚋmodelᚐCategory(ctx context.Context, sel ast.SelectionSet, v model.Category) graphql.Marshaler {
 	return ec._Category(ctx, sel, &v)
 }
@@ -6402,6 +6799,11 @@ func (ec *executionContext) marshalNCategory2ᚖecommᚑbackendᚋgraphᚋmodel�
 
 func (ec *executionContext) unmarshalNCategoryInput2ecommᚑbackendᚋgraphᚋmodelᚐCategoryInput(ctx context.Context, v any) (model.CategoryInput, error) {
 	res, err := ec.unmarshalInputCategoryInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDeleteCartItemInput2ecommᚑbackendᚋgraphᚋmodelᚐDeleteCartItemInput(ctx context.Context, v any) (model.DeleteCartItemInput, error) {
+	res, err := ec.unmarshalInputDeleteCartItemInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

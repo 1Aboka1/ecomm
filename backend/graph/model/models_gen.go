@@ -13,6 +13,12 @@ type CartItem struct {
 	Quantity   int32  `json:"quantity"`
 }
 
+type CartItemInput struct {
+	ProductID  string `json:"product_id"`
+	ProductSku string `json:"product_sku"`
+	Quantity   int32  `json:"quantity"`
+}
+
 type Category struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
@@ -25,6 +31,11 @@ type Category struct {
 type CategoryInput struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+type DeleteCartItemInput struct {
+	ProductID  string `json:"product_id"`
+	ProductSku string `json:"product_sku"`
 }
 
 type DeleteCategoryInput struct {

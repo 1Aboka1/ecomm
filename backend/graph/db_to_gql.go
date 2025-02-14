@@ -3,9 +3,6 @@ package graph
 import (
 	"ecomm-backend/graph/model"
 	"ecomm-backend/internal/database"
-	"errors"
-
-	"github.com/gin-contrib/sessions"
 )
 
 func toCategoryGQL(category *database.Category) *model.Category {
@@ -80,36 +77,4 @@ func toProductGQL(product *database.Product) *model.Product {
         DeletedAt: deletedAt,
     }
     return productGQL
-}
-
-func CreateCartSession(session sessions.Session, cart *model.Cart) error {
-    session.Set("total", cart.Total)
-    session.Set("cart_items", cart.CartItems)
-
-    session.Save()
-    return nil
-}
-
-func RetrieveCartSession(session sessions.Session, cart *model.Cart) error {
-    var newCart model.Cart
-
-    total, ok := session.Get("total").(int32)
-    if !ok {
-        return errors.New("cart session doesn't have total")
-    }
-    cartItems, ok := session.Get("cart_items").([]*model.CartItem)
-    if !ok {
-        return errors.New("cart session doesn't have cart items")
-    }
-
-    newCart.Total = total
-    newCart.CartItems = cartItems
-
-    *cart = newCart
-
-    return nil
-}
-
-func DeleteSessionCart(session sessions.Session) {
-    session.Clear()
 }

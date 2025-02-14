@@ -71,21 +71,35 @@ input DeleteProductInput {
   id: String!
 }
 
+input CartItemInput {
+  product_id: String!,
+  product_sku: String!,
+  quantity: Int!,
+}
+
+input DeleteCartItemInput {
+  product_id: String!,
+  product_sku: String!,
+}
+
 type Mutation {
-    createCategory(input: CategoryInput!): Category!
-    removeCategory(input: DeleteCategoryInput!): Category!
-    createSubCategory(input: SubCategoryInput!): SubCategory!
-    removeSubCategory(input: DeleteSubCategoryInput!): SubCategory!
-    createProduct(input: ProductInput!): Product!
-    removeProduct(input: DeleteProductInput!): Product!
+  createCategory(input: CategoryInput!): Category!
+  removeCategory(input: DeleteCategoryInput!): Category!
+  createSubCategory(input: SubCategoryInput!): SubCategory!
+  removeSubCategory(input: DeleteSubCategoryInput!): SubCategory!
+  createProduct(input: ProductInput!): Product!
+  removeProduct(input: DeleteProductInput!): Product!
+  addCartItem(input: CartItemInput!): Cart!
+  deleteCartItem(input: DeleteCartItemInput!): Cart!
+  changeCartItemQuantity(input: CartItemInput!): Cart!
 }
 
 type Query {
-    categories: [Category!]!
-    category(id: String!): Category
-    subcategories(category_id: String!): [SubCategory!]!
-    subcategory(id: String!): SubCategory
-    products(sub_category_id: String): [Product!]!
-    product(id: String!): Product
-    cart: Cart!
+  categories: [Category!]!
+  category(id: String!): Category
+  subcategories(category_id: String!): [SubCategory!]!
+  subcategory(id: String!): SubCategory
+  products(sub_category_id: String): [Product!]!
+  product(id: String!): Product
+  cart: Cart!
 }

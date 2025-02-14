@@ -10,8 +10,6 @@ import (
 	"ecomm-backend/internal/database"
 	"errors"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -120,6 +118,39 @@ func (r *mutationResolver) RemoveProduct(ctx context.Context, input model.Delete
 	return productGQL, nil
 }
 
+// AddCartItem is the resolver for the addCartItem field.
+func (r *mutationResolver) AddCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
+	var cart model.Cart
+
+	err := ChangeCartItem(ctx, &cart, input)
+	if err != nil {
+    return nil, errors.New("couldn't create cart session after getting empty cart session")
+	}
+	return &cart, nil
+}
+
+// DeleteCartItem is the resolver for the deleteCartItem field.
+func (r *mutationResolver) DeleteCartItem(ctx context.Context, input model.DeleteCartItemInput) (*model.Cart, error) {
+	var cart model.Cart
+
+	err := ClearCart(ctx, &cart)
+	if err != nil {
+    return nil, errors.New("couldn't delete cart session after getting empty cart session")
+	}
+	return &cart, nil
+}
+
+// ChangeCartItemQuantity is the resolver for the changeCartItemQuantity field.
+func (r *mutationResolver) ChangeCartItemQuantity(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
+	var cart model.Cart
+
+	err := ClearCart(ctx, &cart)
+	if err != nil {
+    return nil, errors.New("couldn't delete cart session after getting empty cart session")
+	}
+	return &cart, nil
+}
+
 // Categories is the resolver for the categories field.
 func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, error) {
 	db := database.OrmDb
@@ -217,17 +248,11 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product,
 
 // Cart is the resolver for the cart field.
 func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
-	c, ok := ctx.(*gin.Context)
-	if !ok {
-		return nil, errors.New("no context")
-	}
-  // TODO: needs to be completed
-	session := sessions.Default(c)
-	var cart model.Cart
-	err := RetrieveCartSession(session, &cart)
-	if err != nil {
-		return nil, errors.New("no cart session")
-	}
+  var cart model.Cart
+  err := RetrieveCart(ctx, &cart)
+  if err != nil {
+    return nil, errors.New("can't retrieve cart")
+  }
 	return &cart, nil
 }
 
