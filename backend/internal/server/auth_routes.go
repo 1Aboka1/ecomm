@@ -80,20 +80,14 @@ func (s *Server) verifySMS(c *gin.Context) {
 
 func (s *Server) signIn(c *gin.Context) {
   var user database.User
+  // check if session already exists
   session := sessions.Default(c)
-  // TODO: avoid creating new session; needs test
   err := auth.RetrieveSession(session, &user)
   if err != nil {
     c.JSON(http.StatusOK, gin.H{"success": "session already exists"})
     return
   }
 
-  if user.ID.String() == "00000000-0000-0000-0000-000000000000" {
-    c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "no user found"})
-    return
-  }
-
-  // verify that the user passed verification
   IDClaims, err := auth.VerifyUser(c)
   if err != nil {
     c.JSON(http.StatusBadRequest, gin.H{"error": err})

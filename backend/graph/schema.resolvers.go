@@ -120,35 +120,35 @@ func (r *mutationResolver) RemoveProduct(ctx context.Context, input model.Delete
 
 // AddCartItem is the resolver for the addCartItem field.
 func (r *mutationResolver) AddCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
-	var cart model.Cart
+	var cart *model.Cart
 
-	err := ChangeCartItem(ctx, &cart, input)
+	cart, err := ChangeCartItem(ctx, input)
 	if err != nil {
     return nil, errors.New("couldn't create cart session after getting empty cart session")
 	}
-	return &cart, nil
+	return cart, nil
 }
 
 // DeleteCartItem is the resolver for the deleteCartItem field.
 func (r *mutationResolver) DeleteCartItem(ctx context.Context, input model.DeleteCartItemInput) (*model.Cart, error) {
-	var cart model.Cart
+	var cart *model.Cart
 
-	err := ClearCart(ctx, &cart)
+	cart, err := ClearCart(ctx)
 	if err != nil {
     return nil, errors.New("couldn't delete cart session after getting empty cart session")
 	}
-	return &cart, nil
+	return cart, nil
 }
 
 // ChangeCartItemQuantity is the resolver for the changeCartItemQuantity field.
 func (r *mutationResolver) ChangeCartItemQuantity(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
-	var cart model.Cart
+	var cart *model.Cart
 
-	err := ClearCart(ctx, &cart)
+	cart, err := ClearCart(ctx)
 	if err != nil {
     return nil, errors.New("couldn't delete cart session after getting empty cart session")
 	}
-	return &cart, nil
+	return cart, nil
 }
 
 // Categories is the resolver for the categories field.
@@ -248,12 +248,12 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product,
 
 // Cart is the resolver for the cart field.
 func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
-  var cart model.Cart
-  err := RetrieveCart(ctx, &cart)
+  var cart *model.Cart
+  cart, err := RetrieveCart(ctx)
   if err != nil {
-    return nil, errors.New("can't retrieve cart")
+    return nil, err
   }
-	return &cart, nil
+	return cart, nil
 }
 
 // Mutation returns MutationResolver implementation.

@@ -8,7 +8,15 @@ import (
     "github.com/gin-gonic/gin"
 )
 
-func Authorizer(permittedRoles []uint) gin.HandlerFunc {
+
+var (
+  AllowOnlyAdmin = authorizer([]uint{database.Admin})
+  AllowOnlyCustomerAndGreater = authorizer([]uint{database.Customer, database.Admin})
+  AllowOnlyGuest = authorizer([]uint{database.Guest})
+  AllowEveryone = authorizer([]uint{database.Guest, database.Admin, database.Customer})
+)
+
+func authorizer(permittedRoles []uint) gin.HandlerFunc {
     return func(c *gin.Context) {
         // Check if guest is allowed
         if database.IsPermitted(database.Guest, permittedRoles) {
@@ -42,3 +50,4 @@ func Authorizer(permittedRoles []uint) gin.HandlerFunc {
         c.Next()
     }
 }
+

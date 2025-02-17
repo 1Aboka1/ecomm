@@ -4,12 +4,12 @@
 package graph
 
 import (
-	"context"
-	"ecomm-backend/graph/model"
-	"errors"
+  "context"
+  "ecomm-backend/graph/model"
+  "errors"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
+  "github.com/gin-contrib/sessions"
+  "github.com/gin-gonic/gin"
 )
 
 func countCartTotal(cartItems []*model.CartItem) (sum int32) {
@@ -20,75 +20,79 @@ func countCartTotal(cartItems []*model.CartItem) (sum int32) {
   return
 }
 
-func createCart(session sessions.Session, cart *model.Cart) error {
-    session.Set("total", 0)
-    session.Set("cart_items", []*model.CartItem{})
+func createCart(session sessions.Session) (*model.Cart, error) {
+  var cart *model.Cart
+  session.Set("total", 0)
+  session.Set("cart_items", []*model.CartItem{})
 
-    session.Save()
+  session.Save()
 
-    cart.CartItems = []*model.CartItem{}
-    cart.Total = 0
-    return nil
+  cart.CartItems = []*model.CartItem{}
+  cart.Total = 0
+  return cart, nil
 }
 
-func RetrieveCart(ctx context.Context, cart *model.Cart) error {
+func RetrieveCart(ctx context.Context) (*model.Cart, error) {
   c, ok := ctx.(*gin.Context)
   if !ok {
-    return errors.New("no context")
+    return nil, errors.New("no context")
   }
 
   session := sessions.Default(c)
 
-  var newCart model.Cart
+  var newCart *model.Cart
 
   total, ok := session.Get("total").(int32)
   if !ok {
-    createCart(session, &newCart)
-    *cart = newCart
-    return nil
+    newCart, err := createCart(session)
+    if err != nil {
+      return nil, err
+    }
+    return newCart, nil
   }
   cartItems, ok := session.Get("cart_items").([]*model.CartItem)
   if !ok {
-    createCart(session, &newCart)
-    *cart = newCart
-    return nil
+    newCart, err := createCart(session)
+    if err != nil {
+      return nil, err
+    }
+    return newCart, nil
   }
 
   newCart.Total = total
   newCart.CartItems = cartItems
 
-  *cart = newCart
-
-  return nil
+  return newCart, nil
 }
 
-func ClearCart(ctx context.Context, cart *model.Cart) error {
+func ClearCart(ctx context.Context) (*model.Cart, error) {
   c, ok := ctx.(*gin.Context)
   if !ok {
-    return errors.New("no context")
+    return nil, errors.New("no context")
   }
 
+  var cart *model.Cart
   session := sessions.Default(c)
 
   session.Delete("total")
   session.Delete("cart_items")
-  err := createCart(session, cart)
+  cart, err := createCart(session)
   if err != nil {
-    return err
+    return nil, err
   }
-  return nil
+  return cart, nil
 }
 
-func ChangeCartItem(ctx context.Context, cart *model.Cart, input model.CartItemInput) error {
+func ChangeCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
   c, ok := ctx.(*gin.Context)
   if !ok {
-    return errors.New("no context")
+    return nil, errors.New("no context")
   }
 
-  var newCart model.Cart
-  err := RetrieveCart(c, &newCart)
+  var newCart *model.Cart
+  newCart, err := RetrieveCart(c)
   if err != nil {
-    return err
+    return nil, err
   }
 
   cartItems := newCart.CartItems
@@ -98,21 +102,21 @@ func ChangeCartItem(ctx context.Context, cart *model.Cart, input model.CartItemI
     }
   }
 
-  cart.Total = countCartTotal(newCart.CartItems)
+  newCart.Total = countCartTotal(newCart.CartItems)
 
-  return nil
+  return newCart, nil
 }
 
-func DeleteCartItem(ctx context.Context, cart *model.Cart, input model.CartItemInput) error {
+func DeleteCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
   c, ok := ctx.(*gin.Context)
   if !ok {
-    return errors.New("no context")
+    return nil, errors.New("no context")
   }
 
-  var newCart model.Cart
-  err := RetrieveCart(c, &newCart)
+  var newCart *model.Cart
+  newCart, err := RetrieveCart(c)
   if err != nil {
-    return err
+    return nil, err
   }
 
   cartItems := newCart.CartItems
@@ -125,20 +129,19 @@ func DeleteCartItem(ctx context.Context, cart *model.Cart, input model.CartItemI
   }
 
   newCart.Total = countCartTotal(newCart.CartItems)
-  *cart = newCart
-  return nil
+  return newCart, nil
 }
 
-func AddCartItem(ctx context.Context, cart *model.Cart, input model.CartItemInput) error {
+func AddCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
   c, ok := ctx.(*gin.Context)
   if !ok {
-    return errors.New("no context")
+    return nil, errors.New("no context")
   }
 
-  var newCart model.Cart
-  err := RetrieveCart(c, &newCart)
+  var newCart *model.Cart
+  newCart, err := RetrieveCart(c)
   if err != nil {
-    return err
+    return nil, err
   }
 
   cartItem := model.CartItem{ Quantity: input.Quantity, ProductID: input.ProductID, ProductSku: input.ProductSku }
@@ -146,7 +149,5 @@ func AddCartItem(ctx context.Context, cart *model.Cart, input model.CartItemInpu
   newCart.CartItems = append(newCart.CartItems, &cartItem)
   newCart.Total = countCartTotal(newCart.CartItems)
 
-  *cart = newCart
-
-  return nil
+  return newCart, nil
 }

@@ -30,12 +30,6 @@ var (
     appEnv = os.Getenv("APP_ENV")
 
     db *gorm.DB
-
-    // TODO: put this in auth/middleware and make Authorizer private
-    allowOnlyAdmin = auth.Authorizer([]uint{database.Admin})
-    allowOnlyCustomerAndGreater = auth.Authorizer([]uint{database.Customer, database.Admin})
-    allowOnlyGuest = auth.Authorizer([]uint{database.Guest})
-    allowEveryone = auth.Authorizer([]uint{database.Guest, database.Admin, database.Customer})
 )
 
 func graphqlHandler() gin.HandlerFunc {
@@ -83,8 +77,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 
     {
         authRoute := v1.Group("/auth")
-        authRoute.POST("/sign_out", allowOnlyCustomerAndGreater, s.signOut)
-        authRoute.Use(allowOnlyGuest)
+        authRoute.POST("/sign_out", auth.AllowOnlyCustomerAndGreater, s.signOut)
+        authRoute.Use(auth.AllowOnlyGuest)
         authRoute.POST("/send_otp", s.sendSMS)
         authRoute.POST("/verify_otp", s.verifySMS)
         authRoute.POST("/sign_in", s.signIn)
@@ -92,6 +86,7 @@ func (s *Server) RegisterRoutes() http.Handler {
     }
 
     {
+      // TODO: need to find way to attach auth middleware to specific routes like cart etc.
         graphRoute := v1.Group("/graph")
         graphRoute.POST("/query", graphqlHandler())
         graphRoute.GET("/", playgroundHandler())
