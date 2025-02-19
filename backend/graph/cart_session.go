@@ -12,6 +12,31 @@ import (
   "github.com/gin-gonic/gin"
 )
 
+func ctxToGinCtx(ctx context.Context) (*gin.Context, error) {
+  ginContext := ctx.Value("ginContextKey")
+	if ginContext == nil {
+		err := errors.New("could not retrieve gin.Context")
+		return nil, err
+	}
+
+	gc, ok := ginContext.(*gin.Context)
+	if !ok {
+		err := errors.New("gin.Context has wrong type")
+		return nil, err
+	}
+  return gc, nil
+}
+
+func getSession(ctx context.Context) (sessions.Session, error) {
+  c, err := ctxToGinCtx(ctx);
+  if err != nil {
+    return nil, err
+  }
+
+  session := sessions.Default(c)
+  return session, nil
+}
+
 func countCartTotal(cartItems []*model.CartItem) (sum int32) {
   sum = 0
   for _, cartItem := range cartItems {
@@ -21,7 +46,7 @@ func countCartTotal(cartItems []*model.CartItem) (sum int32) {
 }
 
 func createCart(session sessions.Session) (*model.Cart, error) {
-  var cart *model.Cart
+  var cart *model.Cart = &model.Cart{}
   session.Set("total", 0)
   session.Set("cart_items", []*model.CartItem{})
 
@@ -33,14 +58,12 @@ func createCart(session sessions.Session) (*model.Cart, error) {
 }
 
 func RetrieveCart(ctx context.Context) (*model.Cart, error) {
-  c, ok := ctx.(*gin.Context)
-  if !ok {
-    return nil, errors.New("no context")
+  session, err := getSession(ctx)
+  if err != nil {
+    return nil, err
   }
 
-  session := sessions.Default(c)
-
-  var newCart *model.Cart
+  var newCart *model.Cart = &model.Cart{}
 
   total, ok := session.Get("total").(int32)
   if !ok {
@@ -66,17 +89,16 @@ func RetrieveCart(ctx context.Context) (*model.Cart, error) {
 }
 
 func ClearCart(ctx context.Context) (*model.Cart, error) {
-  c, ok := ctx.(*gin.Context)
-  if !ok {
-    return nil, errors.New("no context")
+  session, err := getSession(ctx)
+  if err != nil {
+    return nil, err
   }
 
   var cart *model.Cart
-  session := sessions.Default(c)
 
   session.Delete("total")
   session.Delete("cart_items")
-  cart, err := createCart(session)
+  cart, err = createCart(session)
   if err != nil {
     return nil, err
   }
@@ -84,13 +106,8 @@ func ClearCart(ctx context.Context) (*model.Cart, error) {
 }
 
 func ChangeCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
-  c, ok := ctx.(*gin.Context)
-  if !ok {
-    return nil, errors.New("no context")
-  }
-
   var newCart *model.Cart
-  newCart, err := RetrieveCart(c)
+  newCart, err := RetrieveCart(ctx)
   if err != nil {
     return nil, err
   }
@@ -108,13 +125,8 @@ func ChangeCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart
 }
 
 func DeleteCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
-  c, ok := ctx.(*gin.Context)
-  if !ok {
-    return nil, errors.New("no context")
-  }
-
   var newCart *model.Cart
-  newCart, err := RetrieveCart(c)
+  newCart, err := RetrieveCart(ctx)
   if err != nil {
     return nil, err
   }
@@ -133,13 +145,8 @@ func DeleteCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart
 }
 
 func AddCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error) {
-  c, ok := ctx.(*gin.Context)
-  if !ok {
-    return nil, errors.New("no context")
-  }
-
   var newCart *model.Cart
-  newCart, err := RetrieveCart(c)
+  newCart, err := RetrieveCart(ctx)
   if err != nil {
     return nil, err
   }

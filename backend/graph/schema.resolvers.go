@@ -1,3 +1,4 @@
+// TODO: connect middleware to graphql (this file or in routes)
 package graph
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
