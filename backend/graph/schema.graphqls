@@ -1,9 +1,5 @@
-# TODO: 1) add ProductSKU and if necessary SKU_Attribute model
 # 2) test 
-#   1. product
-#   2. productSKU
 #   3. SKU_Attribute
-#   4. cart graphql
 type Category {
   id: String!
   name: String!
@@ -36,14 +32,40 @@ type Product {
 }
 
 type Cart {
-  total: Int!,
-  cart_items: [CartItem]!,
+  total: Int!
+  cart_items: [CartItem]!
 }
 
 type CartItem {
-  product_id: String!,
-  product_sku: String!,
-  quantity: Int!,
+  product_id: String!
+  product_sku: String!
+  quantity: Int!
+}
+
+type ProductSku {
+  id: String!
+  product_id: String!
+  sku: String!
+  price: Int!
+  quantity: Int!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
+  product_attributes: [SkuAttribute]!
+}
+
+type SkuAttribute {
+  product_sku_id: String!
+  product_attribute_id: String!
+  value: String!
+}
+
+type ProductAttribute {
+  id: String!
+  type: String!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
 }
 
 input CategoryInput {
@@ -88,6 +110,24 @@ input DeleteCartItemInput {
   product_sku: String!,
 }
 
+input ProductSkuInput {
+  product_id: String!
+  sku: String!
+  price: Int!
+  quantity: Int!
+  product_attributes: [String]! # array of sku_attribute ids
+}
+
+input ProductAttributeInput {
+  type: String!
+}
+
+input SkuAttributeInput {
+  product_sku_id: String!
+  product_attribute_id: String!
+  value: String!
+}
+
 type Mutation {
   createCategory(input: CategoryInput!): Category!
   removeCategory(input: DeleteCategoryInput!): Category!
@@ -98,6 +138,9 @@ type Mutation {
   addCartItem(input: CartItemInput!): Cart!
   deleteCartItem(input: DeleteCartItemInput!): Cart!
   changeCartItemQuantity(input: CartItemInput!): Cart!
+  createProductSku(input: ProductSkuInput!): ProductSku!
+  createProductAttribute(input: ProductAttributeInput!): ProductAttribute!
+  connectSkuAttribute(input: SkuAttributeInput!): SkuAttribute!
 }
 
 type Query {
@@ -108,4 +151,7 @@ type Query {
   products(sub_category_id: String): [Product!]!
   product(id: String!): Product
   cart: Cart!
+  product_sku(id: String!): ProductSku
+  product_skus(product_id: String!): [ProductSku!]!
+  skus_attributes(product_sku_id: String!): [SkuAttribute!]!
 }

@@ -70,8 +70,11 @@ type ComplexityRoot struct {
 	Mutation struct {
 		AddCartItem            func(childComplexity int, input model.CartItemInput) int
 		ChangeCartItemQuantity func(childComplexity int, input model.CartItemInput) int
+		ConnectSkuAttribute    func(childComplexity int, input model.SkuAttributeInput) int
 		CreateCategory         func(childComplexity int, input model.CategoryInput) int
 		CreateProduct          func(childComplexity int, input model.ProductInput) int
+		CreateProductAttribute func(childComplexity int, input model.ProductAttributeInput) int
+		CreateProductSku       func(childComplexity int, input model.ProductSkuInput) int
 		CreateSubCategory      func(childComplexity int, input model.SubCategoryInput) int
 		DeleteCartItem         func(childComplexity int, input model.DeleteCartItemInput) int
 		RemoveCategory         func(childComplexity int, input model.DeleteCategoryInput) int
@@ -91,14 +94,43 @@ type ComplexityRoot struct {
 		UpdatedAt     func(childComplexity int) int
 	}
 
+	ProductAttribute struct {
+		CreatedAt func(childComplexity int) int
+		DeletedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Type      func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+	}
+
+	ProductSku struct {
+		CreatedAt         func(childComplexity int) int
+		DeletedAt         func(childComplexity int) int
+		ID                func(childComplexity int) int
+		Price             func(childComplexity int) int
+		ProductAttributes func(childComplexity int) int
+		ProductID         func(childComplexity int) int
+		Quantity          func(childComplexity int) int
+		Sku               func(childComplexity int) int
+		UpdatedAt         func(childComplexity int) int
+	}
+
 	Query struct {
-		Cart          func(childComplexity int) int
-		Categories    func(childComplexity int) int
-		Category      func(childComplexity int, id string) int
-		Product       func(childComplexity int, id string) int
-		Products      func(childComplexity int, subCategoryID *string) int
-		Subcategories func(childComplexity int, categoryID string) int
-		Subcategory   func(childComplexity int, id string) int
+		Cart           func(childComplexity int) int
+		Categories     func(childComplexity int) int
+		Category       func(childComplexity int, id string) int
+		Product        func(childComplexity int, id string) int
+		ProductSku     func(childComplexity int, id string) int
+		ProductSkus    func(childComplexity int, productID string) int
+		Products       func(childComplexity int, subCategoryID *string) int
+		SkusAttributes func(childComplexity int, productSkuID string) int
+		Subcategories  func(childComplexity int, categoryID string) int
+		Subcategory    func(childComplexity int, id string) int
+	}
+
+	SkuAttribute struct {
+		ProductAttributeID func(childComplexity int) int
+		ProductSkuID       func(childComplexity int) int
+		Value              func(childComplexity int) int
 	}
 
 	SubCategory struct {
@@ -122,6 +154,9 @@ type MutationResolver interface {
 	AddCartItem(ctx context.Context, input model.CartItemInput) (*model.Cart, error)
 	DeleteCartItem(ctx context.Context, input model.DeleteCartItemInput) (*model.Cart, error)
 	ChangeCartItemQuantity(ctx context.Context, input model.CartItemInput) (*model.Cart, error)
+	CreateProductSku(ctx context.Context, input model.ProductSkuInput) (*model.ProductSku, error)
+	CreateProductAttribute(ctx context.Context, input model.ProductAttributeInput) (*model.ProductAttribute, error)
+	ConnectSkuAttribute(ctx context.Context, input model.SkuAttributeInput) (*model.SkuAttribute, error)
 }
 type QueryResolver interface {
 	Categories(ctx context.Context) ([]*model.Category, error)
@@ -131,6 +166,9 @@ type QueryResolver interface {
 	Products(ctx context.Context, subCategoryID *string) ([]*model.Product, error)
 	Product(ctx context.Context, id string) (*model.Product, error)
 	Cart(ctx context.Context) (*model.Cart, error)
+	ProductSku(ctx context.Context, id string) (*model.ProductSku, error)
+	ProductSkus(ctx context.Context, productID string) ([]*model.ProductSku, error)
+	SkusAttributes(ctx context.Context, productSkuID string) ([]*model.SkuAttribute, error)
 }
 
 type executableSchema struct {
@@ -253,6 +291,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ChangeCartItemQuantity(childComplexity, args["input"].(model.CartItemInput)), true
 
+	case "Mutation.connectSkuAttribute":
+		if e.complexity.Mutation.ConnectSkuAttribute == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_connectSkuAttribute_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ConnectSkuAttribute(childComplexity, args["input"].(model.SkuAttributeInput)), true
+
 	case "Mutation.createCategory":
 		if e.complexity.Mutation.CreateCategory == nil {
 			break
@@ -276,6 +326,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateProduct(childComplexity, args["input"].(model.ProductInput)), true
+
+	case "Mutation.createProductAttribute":
+		if e.complexity.Mutation.CreateProductAttribute == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createProductAttribute_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateProductAttribute(childComplexity, args["input"].(model.ProductAttributeInput)), true
+
+	case "Mutation.createProductSku":
+		if e.complexity.Mutation.CreateProductSku == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createProductSku_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateProductSku(childComplexity, args["input"].(model.ProductSkuInput)), true
 
 	case "Mutation.createSubCategory":
 		if e.complexity.Mutation.CreateSubCategory == nil {
@@ -400,6 +474,104 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Product.UpdatedAt(childComplexity), true
 
+	case "ProductAttribute.created_at":
+		if e.complexity.ProductAttribute.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.ProductAttribute.CreatedAt(childComplexity), true
+
+	case "ProductAttribute.deleted_at":
+		if e.complexity.ProductAttribute.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.ProductAttribute.DeletedAt(childComplexity), true
+
+	case "ProductAttribute.id":
+		if e.complexity.ProductAttribute.ID == nil {
+			break
+		}
+
+		return e.complexity.ProductAttribute.ID(childComplexity), true
+
+	case "ProductAttribute.type":
+		if e.complexity.ProductAttribute.Type == nil {
+			break
+		}
+
+		return e.complexity.ProductAttribute.Type(childComplexity), true
+
+	case "ProductAttribute.updated_at":
+		if e.complexity.ProductAttribute.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.ProductAttribute.UpdatedAt(childComplexity), true
+
+	case "ProductSku.created_at":
+		if e.complexity.ProductSku.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.ProductSku.CreatedAt(childComplexity), true
+
+	case "ProductSku.deleted_at":
+		if e.complexity.ProductSku.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.ProductSku.DeletedAt(childComplexity), true
+
+	case "ProductSku.id":
+		if e.complexity.ProductSku.ID == nil {
+			break
+		}
+
+		return e.complexity.ProductSku.ID(childComplexity), true
+
+	case "ProductSku.price":
+		if e.complexity.ProductSku.Price == nil {
+			break
+		}
+
+		return e.complexity.ProductSku.Price(childComplexity), true
+
+	case "ProductSku.product_attributes":
+		if e.complexity.ProductSku.ProductAttributes == nil {
+			break
+		}
+
+		return e.complexity.ProductSku.ProductAttributes(childComplexity), true
+
+	case "ProductSku.product_id":
+		if e.complexity.ProductSku.ProductID == nil {
+			break
+		}
+
+		return e.complexity.ProductSku.ProductID(childComplexity), true
+
+	case "ProductSku.quantity":
+		if e.complexity.ProductSku.Quantity == nil {
+			break
+		}
+
+		return e.complexity.ProductSku.Quantity(childComplexity), true
+
+	case "ProductSku.sku":
+		if e.complexity.ProductSku.Sku == nil {
+			break
+		}
+
+		return e.complexity.ProductSku.Sku(childComplexity), true
+
+	case "ProductSku.updated_at":
+		if e.complexity.ProductSku.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.ProductSku.UpdatedAt(childComplexity), true
+
 	case "Query.cart":
 		if e.complexity.Query.Cart == nil {
 			break
@@ -438,6 +610,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Product(childComplexity, args["id"].(string)), true
 
+	case "Query.product_sku":
+		if e.complexity.Query.ProductSku == nil {
+			break
+		}
+
+		args, err := ec.field_Query_product_sku_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ProductSku(childComplexity, args["id"].(string)), true
+
+	case "Query.product_skus":
+		if e.complexity.Query.ProductSkus == nil {
+			break
+		}
+
+		args, err := ec.field_Query_product_skus_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ProductSkus(childComplexity, args["product_id"].(string)), true
+
 	case "Query.products":
 		if e.complexity.Query.Products == nil {
 			break
@@ -449,6 +645,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Products(childComplexity, args["sub_category_id"].(*string)), true
+
+	case "Query.skus_attributes":
+		if e.complexity.Query.SkusAttributes == nil {
+			break
+		}
+
+		args, err := ec.field_Query_skus_attributes_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SkusAttributes(childComplexity, args["product_sku_id"].(string)), true
 
 	case "Query.subcategories":
 		if e.complexity.Query.Subcategories == nil {
@@ -473,6 +681,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Subcategory(childComplexity, args["id"].(string)), true
+
+	case "SkuAttribute.product_attribute_id":
+		if e.complexity.SkuAttribute.ProductAttributeID == nil {
+			break
+		}
+
+		return e.complexity.SkuAttribute.ProductAttributeID(childComplexity), true
+
+	case "SkuAttribute.product_sku_id":
+		if e.complexity.SkuAttribute.ProductSkuID == nil {
+			break
+		}
+
+		return e.complexity.SkuAttribute.ProductSkuID(childComplexity), true
+
+	case "SkuAttribute.value":
+		if e.complexity.SkuAttribute.Value == nil {
+			break
+		}
+
+		return e.complexity.SkuAttribute.Value(childComplexity), true
 
 	case "SubCategory.category_id":
 		if e.complexity.SubCategory.CategoryID == nil {
@@ -537,7 +766,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteCategoryInput,
 		ec.unmarshalInputDeleteProductInput,
 		ec.unmarshalInputDeleteSubCategoryInput,
+		ec.unmarshalInputProductAttributeInput,
 		ec.unmarshalInputProductInput,
+		ec.unmarshalInputProductSkuInput,
+		ec.unmarshalInputSkuAttributeInput,
 		ec.unmarshalInputSubCategoryInput,
 	)
 	first := true
@@ -701,6 +933,29 @@ func (ec *executionContext) field_Mutation_changeCartItemQuantity_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_connectSkuAttribute_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_connectSkuAttribute_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_connectSkuAttribute_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.SkuAttributeInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNSkuAttributeInput2ecommᚑbackendᚋgraphᚋmodelᚐSkuAttributeInput(ctx, tmp)
+	}
+
+	var zeroVal model.SkuAttributeInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -721,6 +976,52 @@ func (ec *executionContext) field_Mutation_createCategory_argsInput(
 	}
 
 	var zeroVal model.CategoryInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_createProductAttribute_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_createProductAttribute_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_createProductAttribute_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.ProductAttributeInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNProductAttributeInput2ecommᚑbackendᚋgraphᚋmodelᚐProductAttributeInput(ctx, tmp)
+	}
+
+	var zeroVal model.ProductAttributeInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_createProductSku_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_createProductSku_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_createProductSku_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.ProductSkuInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNProductSkuInput2ecommᚑbackendᚋgraphᚋmodelᚐProductSkuInput(ctx, tmp)
+	}
+
+	var zeroVal model.ProductSkuInput
 	return zeroVal, nil
 }
 
@@ -931,6 +1232,52 @@ func (ec *executionContext) field_Query_product_argsID(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_product_sku_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_product_sku_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_product_sku_argsID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_product_skus_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_product_skus_argsProductID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["product_id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_product_skus_argsProductID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("product_id"))
+	if tmp, ok := rawArgs["product_id"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query_products_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -951,6 +1298,29 @@ func (ec *executionContext) field_Query_products_argsSubCategoryID(
 	}
 
 	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_skus_attributes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_skus_attributes_argsProductSkuID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["product_sku_id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_skus_attributes_argsProductSkuID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("product_sku_id"))
+	if tmp, ok := rawArgs["product_sku_id"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -2202,6 +2572,211 @@ func (ec *executionContext) fieldContext_Mutation_changeCartItemQuantity(ctx con
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createProductSku(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createProductSku(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateProductSku(rctx, fc.Args["input"].(model.ProductSkuInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ProductSku)
+	fc.Result = res
+	return ec.marshalNProductSku2ᚖecommᚑbackendᚋgraphᚋmodelᚐProductSku(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createProductSku(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductSku_id(ctx, field)
+			case "product_id":
+				return ec.fieldContext_ProductSku_product_id(ctx, field)
+			case "sku":
+				return ec.fieldContext_ProductSku_sku(ctx, field)
+			case "price":
+				return ec.fieldContext_ProductSku_price(ctx, field)
+			case "quantity":
+				return ec.fieldContext_ProductSku_quantity(ctx, field)
+			case "created_at":
+				return ec.fieldContext_ProductSku_created_at(ctx, field)
+			case "updated_at":
+				return ec.fieldContext_ProductSku_updated_at(ctx, field)
+			case "deleted_at":
+				return ec.fieldContext_ProductSku_deleted_at(ctx, field)
+			case "product_attributes":
+				return ec.fieldContext_ProductSku_product_attributes(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProductSku", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createProductSku_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createProductAttribute(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createProductAttribute(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateProductAttribute(rctx, fc.Args["input"].(model.ProductAttributeInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ProductAttribute)
+	fc.Result = res
+	return ec.marshalNProductAttribute2ᚖecommᚑbackendᚋgraphᚋmodelᚐProductAttribute(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createProductAttribute(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductAttribute_id(ctx, field)
+			case "type":
+				return ec.fieldContext_ProductAttribute_type(ctx, field)
+			case "created_at":
+				return ec.fieldContext_ProductAttribute_created_at(ctx, field)
+			case "updated_at":
+				return ec.fieldContext_ProductAttribute_updated_at(ctx, field)
+			case "deleted_at":
+				return ec.fieldContext_ProductAttribute_deleted_at(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProductAttribute", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createProductAttribute_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_connectSkuAttribute(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_connectSkuAttribute(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ConnectSkuAttribute(rctx, fc.Args["input"].(model.SkuAttributeInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SkuAttribute)
+	fc.Result = res
+	return ec.marshalNSkuAttribute2ᚖecommᚑbackendᚋgraphᚋmodelᚐSkuAttribute(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_connectSkuAttribute(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "product_sku_id":
+				return ec.fieldContext_SkuAttribute_product_sku_id(ctx, field)
+			case "product_attribute_id":
+				return ec.fieldContext_SkuAttribute_product_attribute_id(ctx, field)
+			case "value":
+				return ec.fieldContext_SkuAttribute_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SkuAttribute", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_connectSkuAttribute_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_id(ctx, field)
 	if err != nil {
@@ -2590,6 +3165,624 @@ func (ec *executionContext) fieldContext_Product_deleted_at(_ context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductAttribute_id(ctx context.Context, field graphql.CollectedField, obj *model.ProductAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductAttribute_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductAttribute_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductAttribute_type(ctx context.Context, field graphql.CollectedField, obj *model.ProductAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductAttribute_type(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductAttribute_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductAttribute_created_at(ctx context.Context, field graphql.CollectedField, obj *model.ProductAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductAttribute_created_at(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductAttribute_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductAttribute_updated_at(ctx context.Context, field graphql.CollectedField, obj *model.ProductAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductAttribute_updated_at(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductAttribute_updated_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductAttribute_deleted_at(ctx context.Context, field graphql.CollectedField, obj *model.ProductAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductAttribute_deleted_at(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductAttribute_deleted_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductSku_id(ctx context.Context, field graphql.CollectedField, obj *model.ProductSku) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductSku_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductSku_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductSku",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductSku_product_id(ctx context.Context, field graphql.CollectedField, obj *model.ProductSku) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductSku_product_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProductID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductSku_product_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductSku",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductSku_sku(ctx context.Context, field graphql.CollectedField, obj *model.ProductSku) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductSku_sku(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Sku, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductSku_sku(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductSku",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductSku_price(ctx context.Context, field graphql.CollectedField, obj *model.ProductSku) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductSku_price(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Price, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductSku_price(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductSku",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductSku_quantity(ctx context.Context, field graphql.CollectedField, obj *model.ProductSku) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductSku_quantity(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Quantity, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductSku_quantity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductSku",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductSku_created_at(ctx context.Context, field graphql.CollectedField, obj *model.ProductSku) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductSku_created_at(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductSku_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductSku",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductSku_updated_at(ctx context.Context, field graphql.CollectedField, obj *model.ProductSku) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductSku_updated_at(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductSku_updated_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductSku",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductSku_deleted_at(ctx context.Context, field graphql.CollectedField, obj *model.ProductSku) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductSku_deleted_at(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductSku_deleted_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductSku",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProductSku_product_attributes(ctx context.Context, field graphql.CollectedField, obj *model.ProductSku) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductSku_product_attributes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProductAttributes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.SkuAttribute)
+	fc.Result = res
+	return ec.marshalNSkuAttribute2ᚕᚖecommᚑbackendᚋgraphᚋmodelᚐSkuAttribute(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductSku_product_attributes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductSku",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "product_sku_id":
+				return ec.fieldContext_SkuAttribute_product_sku_id(ctx, field)
+			case "product_attribute_id":
+				return ec.fieldContext_SkuAttribute_product_attribute_id(ctx, field)
+			case "value":
+				return ec.fieldContext_SkuAttribute_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SkuAttribute", field.Name)
 		},
 	}
 	return fc, nil
@@ -3055,6 +4248,216 @@ func (ec *executionContext) fieldContext_Query_cart(_ context.Context, field gra
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_product_sku(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_product_sku(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ProductSku(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.ProductSku)
+	fc.Result = res
+	return ec.marshalOProductSku2ᚖecommᚑbackendᚋgraphᚋmodelᚐProductSku(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_product_sku(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductSku_id(ctx, field)
+			case "product_id":
+				return ec.fieldContext_ProductSku_product_id(ctx, field)
+			case "sku":
+				return ec.fieldContext_ProductSku_sku(ctx, field)
+			case "price":
+				return ec.fieldContext_ProductSku_price(ctx, field)
+			case "quantity":
+				return ec.fieldContext_ProductSku_quantity(ctx, field)
+			case "created_at":
+				return ec.fieldContext_ProductSku_created_at(ctx, field)
+			case "updated_at":
+				return ec.fieldContext_ProductSku_updated_at(ctx, field)
+			case "deleted_at":
+				return ec.fieldContext_ProductSku_deleted_at(ctx, field)
+			case "product_attributes":
+				return ec.fieldContext_ProductSku_product_attributes(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProductSku", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_product_sku_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_product_skus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_product_skus(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ProductSkus(rctx, fc.Args["product_id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ProductSku)
+	fc.Result = res
+	return ec.marshalNProductSku2ᚕᚖecommᚑbackendᚋgraphᚋmodelᚐProductSkuᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_product_skus(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProductSku_id(ctx, field)
+			case "product_id":
+				return ec.fieldContext_ProductSku_product_id(ctx, field)
+			case "sku":
+				return ec.fieldContext_ProductSku_sku(ctx, field)
+			case "price":
+				return ec.fieldContext_ProductSku_price(ctx, field)
+			case "quantity":
+				return ec.fieldContext_ProductSku_quantity(ctx, field)
+			case "created_at":
+				return ec.fieldContext_ProductSku_created_at(ctx, field)
+			case "updated_at":
+				return ec.fieldContext_ProductSku_updated_at(ctx, field)
+			case "deleted_at":
+				return ec.fieldContext_ProductSku_deleted_at(ctx, field)
+			case "product_attributes":
+				return ec.fieldContext_ProductSku_product_attributes(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProductSku", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_product_skus_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_skus_attributes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_skus_attributes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().SkusAttributes(rctx, fc.Args["product_sku_id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.SkuAttribute)
+	fc.Result = res
+	return ec.marshalNSkuAttribute2ᚕᚖecommᚑbackendᚋgraphᚋmodelᚐSkuAttributeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_skus_attributes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "product_sku_id":
+				return ec.fieldContext_SkuAttribute_product_sku_id(ctx, field)
+			case "product_attribute_id":
+				return ec.fieldContext_SkuAttribute_product_attribute_id(ctx, field)
+			case "value":
+				return ec.fieldContext_SkuAttribute_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SkuAttribute", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_skus_attributes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
@@ -3181,6 +4584,138 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SkuAttribute_product_sku_id(ctx context.Context, field graphql.CollectedField, obj *model.SkuAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SkuAttribute_product_sku_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProductSkuID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SkuAttribute_product_sku_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SkuAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SkuAttribute_product_attribute_id(ctx context.Context, field graphql.CollectedField, obj *model.SkuAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SkuAttribute_product_attribute_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProductAttributeID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SkuAttribute_product_attribute_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SkuAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SkuAttribute_value(ctx context.Context, field graphql.CollectedField, obj *model.SkuAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SkuAttribute_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SkuAttribute_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SkuAttribute",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5632,6 +7167,33 @@ func (ec *executionContext) unmarshalInputDeleteSubCategoryInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputProductAttributeInput(ctx context.Context, obj any) (model.ProductAttributeInput, error) {
+	var it model.ProductAttributeInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"type"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "type":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Type = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputProductInput(ctx context.Context, obj any) (model.ProductInput, error) {
 	var it model.ProductInput
 	asMap := map[string]any{}
@@ -5681,6 +7243,102 @@ func (ec *executionContext) unmarshalInputProductInput(ctx context.Context, obj 
 				return it, err
 			}
 			it.SubCategoryID = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputProductSkuInput(ctx context.Context, obj any) (model.ProductSkuInput, error) {
+	var it model.ProductSkuInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"product_id", "sku", "price", "quantity", "product_attributes"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "product_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_id"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductID = data
+		case "sku":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sku"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Sku = data
+		case "price":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Price = data
+		case "quantity":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quantity"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Quantity = data
+		case "product_attributes":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_attributes"))
+			data, err := ec.unmarshalNString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductAttributes = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSkuAttributeInput(ctx context.Context, obj any) (model.SkuAttributeInput, error) {
+	var it model.SkuAttributeInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"product_sku_id", "product_attribute_id", "value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "product_sku_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_sku_id"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductSkuID = data
+		case "product_attribute_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_attribute_id"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProductAttributeID = data
+		case "value":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Value = data
 		}
 	}
 
@@ -5972,6 +7630,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createProductSku":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createProductSku(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createProductAttribute":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createProductAttribute(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "connectSkuAttribute":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_connectSkuAttribute(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6048,6 +7727,138 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "deleted_at":
 			out.Values[i] = ec._Product_deleted_at(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var productAttributeImplementors = []string{"ProductAttribute"}
+
+func (ec *executionContext) _ProductAttribute(ctx context.Context, sel ast.SelectionSet, obj *model.ProductAttribute) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, productAttributeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProductAttribute")
+		case "id":
+			out.Values[i] = ec._ProductAttribute_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "type":
+			out.Values[i] = ec._ProductAttribute_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "created_at":
+			out.Values[i] = ec._ProductAttribute_created_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updated_at":
+			out.Values[i] = ec._ProductAttribute_updated_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleted_at":
+			out.Values[i] = ec._ProductAttribute_deleted_at(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var productSkuImplementors = []string{"ProductSku"}
+
+func (ec *executionContext) _ProductSku(ctx context.Context, sel ast.SelectionSet, obj *model.ProductSku) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, productSkuImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProductSku")
+		case "id":
+			out.Values[i] = ec._ProductSku_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "product_id":
+			out.Values[i] = ec._ProductSku_product_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "sku":
+			out.Values[i] = ec._ProductSku_sku(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "price":
+			out.Values[i] = ec._ProductSku_price(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "quantity":
+			out.Values[i] = ec._ProductSku_quantity(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "created_at":
+			out.Values[i] = ec._ProductSku_created_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updated_at":
+			out.Values[i] = ec._ProductSku_updated_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleted_at":
+			out.Values[i] = ec._ProductSku_deleted_at(ctx, field, obj)
+		case "product_attributes":
+			out.Values[i] = ec._ProductSku_product_attributes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6235,6 +8046,69 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "product_sku":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_product_sku(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "product_skus":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_product_skus(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "skus_attributes":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_skus_attributes(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -6243,6 +8117,55 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var skuAttributeImplementors = []string{"SkuAttribute"}
+
+func (ec *executionContext) _SkuAttribute(ctx context.Context, sel ast.SelectionSet, obj *model.SkuAttribute) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, skuAttributeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SkuAttribute")
+		case "product_sku_id":
+			out.Values[i] = ec._SkuAttribute_product_sku_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "product_attribute_id":
+			out.Values[i] = ec._SkuAttribute_product_attribute_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "value":
+			out.Values[i] = ec._SkuAttribute_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6895,8 +8818,191 @@ func (ec *executionContext) marshalNProduct2ᚖecommᚑbackendᚋgraphᚋmodel�
 	return ec._Product(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNProductAttribute2ecommᚑbackendᚋgraphᚋmodelᚐProductAttribute(ctx context.Context, sel ast.SelectionSet, v model.ProductAttribute) graphql.Marshaler {
+	return ec._ProductAttribute(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProductAttribute2ᚖecommᚑbackendᚋgraphᚋmodelᚐProductAttribute(ctx context.Context, sel ast.SelectionSet, v *model.ProductAttribute) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ProductAttribute(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNProductAttributeInput2ecommᚑbackendᚋgraphᚋmodelᚐProductAttributeInput(ctx context.Context, v any) (model.ProductAttributeInput, error) {
+	res, err := ec.unmarshalInputProductAttributeInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNProductInput2ecommᚑbackendᚋgraphᚋmodelᚐProductInput(ctx context.Context, v any) (model.ProductInput, error) {
 	res, err := ec.unmarshalInputProductInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProductSku2ecommᚑbackendᚋgraphᚋmodelᚐProductSku(ctx context.Context, sel ast.SelectionSet, v model.ProductSku) graphql.Marshaler {
+	return ec._ProductSku(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProductSku2ᚕᚖecommᚑbackendᚋgraphᚋmodelᚐProductSkuᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ProductSku) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNProductSku2ᚖecommᚑbackendᚋgraphᚋmodelᚐProductSku(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNProductSku2ᚖecommᚑbackendᚋgraphᚋmodelᚐProductSku(ctx context.Context, sel ast.SelectionSet, v *model.ProductSku) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ProductSku(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNProductSkuInput2ecommᚑbackendᚋgraphᚋmodelᚐProductSkuInput(ctx context.Context, v any) (model.ProductSkuInput, error) {
+	res, err := ec.unmarshalInputProductSkuInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSkuAttribute2ecommᚑbackendᚋgraphᚋmodelᚐSkuAttribute(ctx context.Context, sel ast.SelectionSet, v model.SkuAttribute) graphql.Marshaler {
+	return ec._SkuAttribute(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSkuAttribute2ᚕᚖecommᚑbackendᚋgraphᚋmodelᚐSkuAttribute(ctx context.Context, sel ast.SelectionSet, v []*model.SkuAttribute) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOSkuAttribute2ᚖecommᚑbackendᚋgraphᚋmodelᚐSkuAttribute(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalNSkuAttribute2ᚕᚖecommᚑbackendᚋgraphᚋmodelᚐSkuAttributeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SkuAttribute) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSkuAttribute2ᚖecommᚑbackendᚋgraphᚋmodelᚐSkuAttribute(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNSkuAttribute2ᚖecommᚑbackendᚋgraphᚋmodelᚐSkuAttribute(ctx context.Context, sel ast.SelectionSet, v *model.SkuAttribute) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SkuAttribute(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNSkuAttributeInput2ecommᚑbackendᚋgraphᚋmodelᚐSkuAttributeInput(ctx context.Context, v any) (model.SkuAttributeInput, error) {
+	res, err := ec.unmarshalInputSkuAttributeInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -6913,6 +9019,32 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v any) ([]*string, error) {
+	var vSlice []any
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNSubCategory2ecommᚑbackendᚋgraphᚋmodelᚐSubCategory(ctx context.Context, sel ast.SelectionSet, v model.SubCategory) graphql.Marshaler {
@@ -7276,6 +9408,20 @@ func (ec *executionContext) marshalOProduct2ᚖecommᚑbackendᚋgraphᚋmodel�
 		return graphql.Null
 	}
 	return ec._Product(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProductSku2ᚖecommᚑbackendᚋgraphᚋmodelᚐProductSku(ctx context.Context, sel ast.SelectionSet, v *model.ProductSku) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ProductSku(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOSkuAttribute2ᚖecommᚑbackendᚋgraphᚋmodelᚐSkuAttribute(ctx context.Context, sel ast.SelectionSet, v *model.SkuAttribute) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SkuAttribute(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

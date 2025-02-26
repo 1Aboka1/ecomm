@@ -17,17 +17,15 @@ type Product struct {
 type ProductSku struct {
     DefaultModel
 
-    ProductID                 uuid.UUID        `gorm:index`
+    ProductID                 uuid.UUID         `gorm:index`
     Sku                       string            `json:"sku"`       
     Price                     uint              `json:"price"`
-    Quantity                  uint              `json:"quantity"`    
+    Quantity                  uint              `json:"quantity"`    // quantity left
 
     ProductAttributes         []*ProductAttribute    `gorm:"many2many:sku_attributes;"`
 
 }
 
-// TODO: Need to make value available only from ENUM (use some method from gorm).
-// also need to make it available in admin dashboard
 type ProductAttribute struct {
     DefaultModel
 

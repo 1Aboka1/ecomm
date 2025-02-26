@@ -65,6 +65,18 @@ type Product struct {
 	DeletedAt     *string `json:"deleted_at,omitempty"`
 }
 
+type ProductAttribute struct {
+	ID        string  `json:"id"`
+	Type      string  `json:"type"`
+	CreatedAt string  `json:"created_at"`
+	UpdatedAt string  `json:"updated_at"`
+	DeletedAt *string `json:"deleted_at,omitempty"`
+}
+
+type ProductAttributeInput struct {
+	Type string `json:"type"`
+}
+
 type ProductInput struct {
 	Name          string `json:"name"`
 	Description   string `json:"description"`
@@ -73,7 +85,39 @@ type ProductInput struct {
 	SubCategoryID string `json:"sub_category_id"`
 }
 
+type ProductSku struct {
+	ID                string          `json:"id"`
+	ProductID         string          `json:"product_id"`
+	Sku               string          `json:"sku"`
+	Price             int32           `json:"price"`
+	Quantity          int32           `json:"quantity"`
+	CreatedAt         string          `json:"created_at"`
+	UpdatedAt         string          `json:"updated_at"`
+	DeletedAt         *string         `json:"deleted_at,omitempty"`
+	ProductAttributes []*SkuAttribute `json:"product_attributes"`
+}
+
+type ProductSkuInput struct {
+	ProductID         string    `json:"product_id"`
+	Sku               string    `json:"sku"`
+	Price             int32     `json:"price"`
+	Quantity          int32     `json:"quantity"`
+	ProductAttributes []*string `json:"product_attributes"`
+}
+
 type Query struct {
+}
+
+type SkuAttribute struct {
+	ProductSkuID       string `json:"product_sku_id"`
+	ProductAttributeID string `json:"product_attribute_id"`
+	Value              string `json:"value"`
+}
+
+type SkuAttributeInput struct {
+	ProductSkuID       string `json:"product_sku_id"`
+	ProductAttributeID string `json:"product_attribute_id"`
+	Value              string `json:"value"`
 }
 
 type SubCategory struct {

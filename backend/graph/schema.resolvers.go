@@ -1,4 +1,3 @@
-// TODO: connect middleware to graphql (this file or in routes)
 package graph
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
@@ -10,6 +9,7 @@ import (
 	"ecomm-backend/graph/model"
 	"ecomm-backend/internal/database"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -125,7 +125,7 @@ func (r *mutationResolver) AddCartItem(ctx context.Context, input model.CartItem
 
 	cart, err := ChangeCartItem(ctx, input)
 	if err != nil {
-    return nil, errors.New("couldn't create cart session after getting empty cart session")
+		return nil, errors.New("couldn't create cart session after getting empty cart session")
 	}
 	return cart, nil
 }
@@ -136,7 +136,7 @@ func (r *mutationResolver) DeleteCartItem(ctx context.Context, input model.Delet
 
 	cart, err := ClearCart(ctx)
 	if err != nil {
-    return nil, errors.New("couldn't delete cart session after getting empty cart session")
+		return nil, errors.New("couldn't delete cart session after getting empty cart session")
 	}
 	return cart, nil
 }
@@ -147,9 +147,24 @@ func (r *mutationResolver) ChangeCartItemQuantity(ctx context.Context, input mod
 
 	cart, err := ClearCart(ctx)
 	if err != nil {
-    return nil, errors.New("couldn't delete cart session after getting empty cart session")
+		return nil, errors.New("couldn't delete cart session after getting empty cart session")
 	}
 	return cart, nil
+}
+
+// CreateProductSku is the resolver for the createProductSku field.
+func (r *mutationResolver) CreateProductSku(ctx context.Context, input model.ProductSkuInput) (*model.ProductSku, error) {
+	panic(fmt.Errorf("not implemented: CreateProductSku - createProductSku"))
+}
+
+// CreateProductAttribute is the resolver for the createProductAttribute field.
+func (r *mutationResolver) CreateProductAttribute(ctx context.Context, input model.ProductAttributeInput) (*model.ProductAttribute, error) {
+	panic(fmt.Errorf("not implemented: CreateProductAttribute - createProductAttribute"))
+}
+
+// ConnectSkuAttribute is the resolver for the connectSkuAttribute field.
+func (r *mutationResolver) ConnectSkuAttribute(ctx context.Context, input model.SkuAttributeInput) (*model.SkuAttribute, error) {
+	panic(fmt.Errorf("not implemented: ConnectSkuAttribute - connectSkuAttribute"))
 }
 
 // Categories is the resolver for the categories field.
@@ -249,12 +264,27 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product,
 
 // Cart is the resolver for the cart field.
 func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
-  var cart *model.Cart
-  cart, err := RetrieveCart(ctx)
-  if err != nil {
-    return nil, err
-  }
+	var cart *model.Cart
+	cart, err := RetrieveCart(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return cart, nil
+}
+
+// ProductSku is the resolver for the product_sku field.
+func (r *queryResolver) ProductSku(ctx context.Context, id string) (*model.ProductSku, error) {
+	panic(fmt.Errorf("not implemented: ProductSku - product_sku"))
+}
+
+// ProductSkus is the resolver for the product_skus field.
+func (r *queryResolver) ProductSkus(ctx context.Context, productID string) ([]*model.ProductSku, error) {
+	panic(fmt.Errorf("not implemented: ProductSkus - product_skus"))
+}
+
+// SkusAttributes is the resolver for the skus_attributes field.
+func (r *queryResolver) SkusAttributes(ctx context.Context, productSkuID string) ([]*model.SkuAttribute, error) {
+	panic(fmt.Errorf("not implemented: SkusAttributes - skus_attributes"))
 }
 
 // Mutation returns MutationResolver implementation.

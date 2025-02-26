@@ -1,6 +1,3 @@
-// TODO: I should refactor this file. Cart pointer shouldn't be in the parameters
-// it should be in return. Otherwise, can't understand what the function does.
-// plus, gin.Context type assertion should be in caller side (maybe)
 package graph
 
 import (
