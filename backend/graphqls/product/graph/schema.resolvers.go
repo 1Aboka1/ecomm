@@ -17,12 +17,12 @@ import (
 func (r *mutationResolver) CreateProduct(ctx context.Context, input model.ProductInput) (*model.Product, error) {
 	db := database.OrmDb
 
-	sub_category_id, err := uuid.Parse(input.SubCategoryID)
+	subCategoryID, err := uuid.Parse(input.SubCategoryID)
 	if err != nil {
 		return nil, err
 	}
 
-	product := &database.Product{Name: input.Name, Description: input.Description, Summary: input.Summary, Cover: input.Cover, SubCategoryID: sub_category_id}
+	product := &database.Product{Name: input.Name, Description: input.Description, Summary: input.Summary, Cover: input.Cover, SubCategoryID: subCategoryID}
 
 	result := db.Create(&product)
 	if result.Error != nil {

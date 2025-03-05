@@ -8,7 +8,6 @@ import (
 	"context"
 	"ecomm-backend/graphqls/category/graph/model"
 	"ecomm-backend/internal/database"
-	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -82,7 +81,19 @@ func (r *mutationResolver) RemoveSubCategory(ctx context.Context, input model.De
 
 // Categories is the resolver for the categories field.
 func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, error) {
-	panic(fmt.Errorf("not implemented: Categories - categories"))
+	db := database.OrmDb
+	var categories []database.Category
+
+	result := db.Select("id", "name", "created_at", "updated_at", "deleted_at", "description").Find(&categories)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var categoriesGQL []*model.Category
+	for _, category := range categories {
+		categoriesGQL = append(categoriesGQL, toCategoryGQL(&category))
+	}
+	return categoriesGQL, nil
 }
 
 // Category is the resolver for the category field.

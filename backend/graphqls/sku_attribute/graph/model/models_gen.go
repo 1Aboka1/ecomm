@@ -6,11 +6,8 @@ type Mutation struct {
 }
 
 type ProductAttribute struct {
-	ID        string  `json:"id"`
-	Type      string  `json:"type"`
-	CreatedAt string  `json:"created_at"`
-	UpdatedAt string  `json:"updated_at"`
-	DeletedAt *string `json:"deleted_at,omitempty"`
+	ID   string `json:"id"`
+	Type string `json:"type"`
 }
 
 type ProductAttributeInput struct {
@@ -30,20 +27,18 @@ type ProductSku struct {
 }
 
 type ProductSkuInput struct {
-	ProductID         string    `json:"product_id"`
-	Sku               string    `json:"sku"`
-	Price             int32     `json:"price"`
-	Quantity          int32     `json:"quantity"`
-	ProductAttributes []*string `json:"product_attributes"`
+	ProductID string `json:"product_id"`
+	Sku       string `json:"sku"`
+	Price     int32  `json:"price"`
+	Quantity  int32  `json:"quantity"`
 }
 
 type Query struct {
 }
 
 type SkuAttribute struct {
-	ProductSkuID       string `json:"product_sku_id"`
-	ProductAttributeID string `json:"product_attribute_id"`
-	Value              string `json:"value"`
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }
 
 type SkuAttributeInput struct {

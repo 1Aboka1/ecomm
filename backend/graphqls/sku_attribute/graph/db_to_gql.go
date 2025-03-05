@@ -30,6 +30,31 @@ func toSkuGQL(productSku *database.ProductSku) *model.ProductSku {
         CreatedAt: createdAt,
         UpdatedAt: updatedAt,
         DeletedAt: deletedAt,
+        ProductAttributes: nil, // idk why
     }
     return productGQL
+}
+
+func toAttributeGQL(attribute *database.ProductAttribute) *model.ProductAttribute {
+    attributeGQL := &model.ProductAttribute{ 
+        ID: attribute.ID.String(),
+        Type: attribute.Type,
+    }
+    return attributeGQL
+}
+
+func toSkuAttributeGQL(skuAttribute *database.SkuAttributes) *model.SkuAttribute {
+	db := database.OrmDb
+
+	var attribute database.ProductAttribute
+	result := db.Where("id = ?", skuAttribute.AttributeID).Take(&attribute)
+	if result.Error != nil {
+		return nil
+	}
+
+  skuAttributeGQL := &model.SkuAttribute{ 
+    Type: attribute.Type,
+    Value: skuAttribute.Value,
+  }
+  return skuAttributeGQL
 }

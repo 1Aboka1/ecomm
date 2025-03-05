@@ -11,17 +11,13 @@ type ProductSku {
 }
 
 type SkuAttribute {
-  product_sku_id: String!
-  product_attribute_id: String!
+  type: String!
   value: String!
 }
 
 type ProductAttribute {
   id: String!
   type: String!
-  created_at: String!
-  updated_at: String!
-  deleted_at: String
 }
 
 input ProductSkuInput {
@@ -29,7 +25,6 @@ input ProductSkuInput {
   sku: String!
   price: Int!
   quantity: Int!
-  product_attributes: [String]! # array of sku_attribute ids
 }
 
 input ProductAttributeInput {

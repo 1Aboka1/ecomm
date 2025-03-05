@@ -33,8 +33,7 @@ type SkuAttributes struct {
 }
 
 type ProductAttribute struct {
-  DefaultModel
-
+  ID                        uuid.UUID       `gorm:"type:uuid;default:gen_random_uuid()" json:"id"`
   Type                      string             `json:"type"`   
   ProductSkus               []*ProductSku    `gorm:"many2many:sku_attributes;"`
 }

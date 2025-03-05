@@ -54,11 +54,8 @@ type ComplexityRoot struct {
 	}
 
 	ProductAttribute struct {
-		CreatedAt func(childComplexity int) int
-		DeletedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Type      func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
+		ID   func(childComplexity int) int
+		Type func(childComplexity int) int
 	}
 
 	ProductSku struct {
@@ -80,9 +77,8 @@ type ComplexityRoot struct {
 	}
 
 	SkuAttribute struct {
-		ProductAttributeID func(childComplexity int) int
-		ProductSkuID       func(childComplexity int) int
-		Value              func(childComplexity int) int
+		Type  func(childComplexity int) int
+		Value func(childComplexity int) int
 	}
 }
 
@@ -152,20 +148,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateProductSku(childComplexity, args["input"].(model.ProductSkuInput)), true
 
-	case "ProductAttribute.created_at":
-		if e.complexity.ProductAttribute.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.ProductAttribute.CreatedAt(childComplexity), true
-
-	case "ProductAttribute.deleted_at":
-		if e.complexity.ProductAttribute.DeletedAt == nil {
-			break
-		}
-
-		return e.complexity.ProductAttribute.DeletedAt(childComplexity), true
-
 	case "ProductAttribute.id":
 		if e.complexity.ProductAttribute.ID == nil {
 			break
@@ -179,13 +161,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProductAttribute.Type(childComplexity), true
-
-	case "ProductAttribute.updated_at":
-		if e.complexity.ProductAttribute.UpdatedAt == nil {
-			break
-		}
-
-		return e.complexity.ProductAttribute.UpdatedAt(childComplexity), true
 
 	case "ProductSku.created_at":
 		if e.complexity.ProductSku.CreatedAt == nil {
@@ -286,19 +261,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.SkusAttributes(childComplexity, args["product_sku_id"].(string)), true
 
-	case "SkuAttribute.product_attribute_id":
-		if e.complexity.SkuAttribute.ProductAttributeID == nil {
+	case "SkuAttribute.type":
+		if e.complexity.SkuAttribute.Type == nil {
 			break
 		}
 
-		return e.complexity.SkuAttribute.ProductAttributeID(childComplexity), true
-
-	case "SkuAttribute.product_sku_id":
-		if e.complexity.SkuAttribute.ProductSkuID == nil {
-			break
-		}
-
-		return e.complexity.SkuAttribute.ProductSkuID(childComplexity), true
+		return e.complexity.SkuAttribute.Type(childComplexity), true
 
 	case "SkuAttribute.value":
 		if e.complexity.SkuAttribute.Value == nil {
@@ -813,12 +781,6 @@ func (ec *executionContext) fieldContext_Mutation_createProductAttribute(ctx con
 				return ec.fieldContext_ProductAttribute_id(ctx, field)
 			case "type":
 				return ec.fieldContext_ProductAttribute_type(ctx, field)
-			case "created_at":
-				return ec.fieldContext_ProductAttribute_created_at(ctx, field)
-			case "updated_at":
-				return ec.fieldContext_ProductAttribute_updated_at(ctx, field)
-			case "deleted_at":
-				return ec.fieldContext_ProductAttribute_deleted_at(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProductAttribute", field.Name)
 		},
@@ -876,10 +838,8 @@ func (ec *executionContext) fieldContext_Mutation_connectSkuAttribute(ctx contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "product_sku_id":
-				return ec.fieldContext_SkuAttribute_product_sku_id(ctx, field)
-			case "product_attribute_id":
-				return ec.fieldContext_SkuAttribute_product_attribute_id(ctx, field)
+			case "type":
+				return ec.fieldContext_SkuAttribute_type(ctx, field)
 			case "value":
 				return ec.fieldContext_SkuAttribute_value(ctx, field)
 			}
@@ -976,135 +936,6 @@ func (ec *executionContext) _ProductAttribute_type(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext_ProductAttribute_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProductAttribute",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProductAttribute_created_at(ctx context.Context, field graphql.CollectedField, obj *model.ProductAttribute) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProductAttribute_created_at(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProductAttribute_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProductAttribute",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProductAttribute_updated_at(ctx context.Context, field graphql.CollectedField, obj *model.ProductAttribute) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProductAttribute_updated_at(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UpdatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProductAttribute_updated_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProductAttribute",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProductAttribute_deleted_at(ctx context.Context, field graphql.CollectedField, obj *model.ProductAttribute) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProductAttribute_deleted_at(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DeletedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProductAttribute_deleted_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ProductAttribute",
 		Field:      field,
@@ -1505,10 +1336,8 @@ func (ec *executionContext) fieldContext_ProductSku_product_attributes(_ context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "product_sku_id":
-				return ec.fieldContext_SkuAttribute_product_sku_id(ctx, field)
-			case "product_attribute_id":
-				return ec.fieldContext_SkuAttribute_product_attribute_id(ctx, field)
+			case "type":
+				return ec.fieldContext_SkuAttribute_type(ctx, field)
 			case "value":
 				return ec.fieldContext_SkuAttribute_value(ctx, field)
 			}
@@ -1704,10 +1533,8 @@ func (ec *executionContext) fieldContext_Query_skus_attributes(ctx context.Conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "product_sku_id":
-				return ec.fieldContext_SkuAttribute_product_sku_id(ctx, field)
-			case "product_attribute_id":
-				return ec.fieldContext_SkuAttribute_product_attribute_id(ctx, field)
+			case "type":
+				return ec.fieldContext_SkuAttribute_type(ctx, field)
 			case "value":
 				return ec.fieldContext_SkuAttribute_value(ctx, field)
 			}
@@ -1859,8 +1686,8 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _SkuAttribute_product_sku_id(ctx context.Context, field graphql.CollectedField, obj *model.SkuAttribute) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SkuAttribute_product_sku_id(ctx, field)
+func (ec *executionContext) _SkuAttribute_type(ctx context.Context, field graphql.CollectedField, obj *model.SkuAttribute) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SkuAttribute_type(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1873,7 +1700,7 @@ func (ec *executionContext) _SkuAttribute_product_sku_id(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ProductSkuID, nil
+		return obj.Type, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1890,51 +1717,7 @@ func (ec *executionContext) _SkuAttribute_product_sku_id(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SkuAttribute_product_sku_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "SkuAttribute",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _SkuAttribute_product_attribute_id(ctx context.Context, field graphql.CollectedField, obj *model.SkuAttribute) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SkuAttribute_product_attribute_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ProductAttributeID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_SkuAttribute_product_attribute_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SkuAttribute_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SkuAttribute",
 		Field:      field,
@@ -3976,7 +3759,7 @@ func (ec *executionContext) unmarshalInputProductSkuInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"product_id", "sku", "price", "quantity", "product_attributes"}
+	fieldsInOrder := [...]string{"product_id", "sku", "price", "quantity"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4011,13 +3794,6 @@ func (ec *executionContext) unmarshalInputProductSkuInput(ctx context.Context, o
 				return it, err
 			}
 			it.Quantity = data
-		case "product_attributes":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("product_attributes"))
-			data, err := ec.unmarshalNString2ᚕᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ProductAttributes = data
 		}
 	}
 
@@ -4157,18 +3933,6 @@ func (ec *executionContext) _ProductAttribute(ctx context.Context, sel ast.Selec
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._ProductAttribute_created_at(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "updated_at":
-			out.Values[i] = ec._ProductAttribute_updated_at(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "deleted_at":
-			out.Values[i] = ec._ProductAttribute_deleted_at(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4392,13 +4156,8 @@ func (ec *executionContext) _SkuAttribute(ctx context.Context, sel ast.Selection
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("SkuAttribute")
-		case "product_sku_id":
-			out.Values[i] = ec._SkuAttribute_product_sku_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "product_attribute_id":
-			out.Values[i] = ec._SkuAttribute_product_attribute_id(ctx, field, obj)
+		case "type":
+			out.Values[i] = ec._SkuAttribute_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4991,32 +4750,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v any) ([]*string, error) {
-	var vSlice []any
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]*string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

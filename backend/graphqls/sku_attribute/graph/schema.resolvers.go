@@ -7,37 +7,112 @@ package graph
 import (
 	"context"
 	"ecomm-backend/graphqls/sku_attribute/graph/model"
+	"ecomm-backend/internal/database"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 // CreateProductSku is the resolver for the createProductSku field.
 func (r *mutationResolver) CreateProductSku(ctx context.Context, input model.ProductSkuInput) (*model.ProductSku, error) {
-	panic(fmt.Errorf("not implemented: CreateProductSku - createProductSku"))
+	db := database.OrmDb
+
+	productId, err := uuid.Parse(input.ProductID)
+	if err != nil {
+		return nil, err
+	}
+
+	sku := &database.ProductSku{Sku: input.Sku, Price: uint(input.Price), Quantity: uint(input.Quantity), ProductID: productId, ProductAttributes: nil}
+
+	result := db.Create(&sku)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	skuGQL := toSkuGQL(sku)
+	return skuGQL, nil
 }
 
 // CreateProductAttribute is the resolver for the createProductAttribute field.
 func (r *mutationResolver) CreateProductAttribute(ctx context.Context, input model.ProductAttributeInput) (*model.ProductAttribute, error) {
-	panic(fmt.Errorf("not implemented: CreateProductAttribute - createProductAttribute"))
+	db := database.OrmDb
+
+	attribute := &database.ProductAttribute{Type: input.Type}
+
+	result := db.Create(&attribute)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	attributeGQL := toAttributeGQL(attribute)
+	return attributeGQL, nil
 }
 
 // ConnectSkuAttribute is the resolver for the connectSkuAttribute field.
 func (r *mutationResolver) ConnectSkuAttribute(ctx context.Context, input model.SkuAttributeInput) (*model.SkuAttribute, error) {
-	panic(fmt.Errorf("not implemented: ConnectSkuAttribute - connectSkuAttribute"))
+	db := database.OrmDb
+
+	skuId, err := uuid.Parse(input.ProductSkuID)
+	if err != nil {
+		return nil, err
+	}
+	attributeId, err := uuid.Parse(input.ProductAttributeID)
+	if err != nil {
+		return nil, err
+	}
+	skuAttribute := &database.SkuAttributes{Value: input.Value, SkuID: skuId, AttributeID: attributeId}
+
+	result := db.Create(&skuAttribute)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	skuAttributeGQL := toSkuAttributeGQL(skuAttribute)
+	return skuAttributeGQL, nil
 }
 
 // ProductSku is the resolver for the product_sku field.
 func (r *queryResolver) ProductSku(ctx context.Context, id string) (*model.ProductSku, error) {
-	panic(fmt.Errorf("not implemented: ProductSku - product_sku"))
+	db := database.OrmDb
+	var sku database.ProductSku
+	result := db.Where("id = ?", id).Take(&sku)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	skuGql := toSkuGQL(&sku)
+	return skuGql, nil
 }
 
 // ProductSkus is the resolver for the product_skus field.
 func (r *queryResolver) ProductSkus(ctx context.Context, productID string) ([]*model.ProductSku, error) {
-	panic(fmt.Errorf("not implemented: ProductSkus - product_skus"))
+  db := database.OrmDb
+	var skus []database.ProductSku
+
+	result := db.Where("product_id = ?", productID).Select("id", "sku", "created_at", "updated_at", "deleted_at", "price", "quantity").Find(&skus)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var skusGQL []*model.ProductSku
+	for _, sku := range skus {
+		skusGQL = append(skusGQL, toSkuGQL(&sku))
+	}
+	return skusGQL, nil
 }
 
 // SkusAttributes is the resolver for the skus_attributes field.
 func (r *queryResolver) SkusAttributes(ctx context.Context, productSkuID string) ([]*model.SkuAttribute, error) {
-	panic(fmt.Errorf("not implemented: SkusAttributes - skus_attributes"))
+  db := database.OrmDb
+	var skuAttributes []database.SkuAttributes
+
+	result := db.Where("product_sku_id = ?", productSkuID).Select("value", "product_attribute_id").Find(&skuAttributes)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	var skuAttributesGQL []*model.SkuAttribute
+	for _, skuAttribute := range skuAttributes {
+		skuAttributesGQL = append(skuAttributesGQL, toSkuAttributeGQL(&skuAttribute))
+	}
+	return skuAttributesGQL, nil
 }
 
 // Mutation returns MutationResolver implementation.
