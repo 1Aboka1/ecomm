@@ -8,6 +8,5 @@ import "ecomm-backend/internal/database"
 
 type Resolver struct {
     CategoryStore map[string]database.Category
-    ProductStore map[string]database.Product
     SubCategoryStore map[string]database.SubCategory
 }

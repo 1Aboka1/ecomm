@@ -1,0 +1,31 @@
+type Cart {
+  total: Int!
+  cart_items: [CartItem]!
+}
+
+type CartItem {
+  product_id: String!
+  product_sku: String!
+  quantity: Int!
+}
+
+input CartItemInput {
+  product_id: String!,
+  product_sku: String!,
+  quantity: Int!,
+}
+
+input DeleteCartItemInput {
+  product_id: String!,
+  product_sku: String!,
+}
+
+type Mutation {
+  addCartItem(input: CartItemInput!): Cart!
+  deleteCartItem(input: DeleteCartItemInput!): Cart!
+  changeCartItemQuantity(input: CartItemInput!): Cart!
+}
+
+type Query {
+  cart: Cart!
+}

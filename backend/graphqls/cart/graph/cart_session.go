@@ -2,7 +2,7 @@ package graph
 
 import (
   "context"
-  "ecomm-backend/graph/model"
+	"ecomm-backend/graphqls/cart/graph/model"
   "errors"
 
   "github.com/gin-contrib/sessions"

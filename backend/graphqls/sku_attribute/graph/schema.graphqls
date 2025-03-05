@@ -1,0 +1,55 @@
+type ProductSku {
+  id: String!
+  product_id: String!
+  sku: String!
+  price: Int!
+  quantity: Int!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
+  product_attributes: [SkuAttribute]!
+}
+
+type SkuAttribute {
+  product_sku_id: String!
+  product_attribute_id: String!
+  value: String!
+}
+
+type ProductAttribute {
+  id: String!
+  type: String!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
+}
+
+input ProductSkuInput {
+  product_id: String!
+  sku: String!
+  price: Int!
+  quantity: Int!
+  product_attributes: [String]! # array of sku_attribute ids
+}
+
+input ProductAttributeInput {
+  type: String!
+}
+
+input SkuAttributeInput {
+  product_sku_id: String!
+  product_attribute_id: String!
+  value: String!
+}
+
+type Mutation {
+  createProductSku(input: ProductSkuInput!): ProductSku!
+  createProductAttribute(input: ProductAttributeInput!): ProductAttribute!
+  connectSkuAttribute(input: SkuAttributeInput!): SkuAttribute!
+}
+
+type Query {
+  product_sku(id: String!): ProductSku
+  product_skus(product_id: String!): [ProductSku!]!
+  skus_attributes(product_sku_id: String!): [SkuAttribute!]!
+}

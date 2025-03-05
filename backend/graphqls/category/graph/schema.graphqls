@@ -1,0 +1,51 @@
+type Category {
+  id: String!
+  name: String!
+  description: String!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
+}
+
+type SubCategory {
+  id: String!
+  name: String!
+  description: String!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
+  category_id: String!
+}
+
+input CategoryInput {
+  name: String!
+  description: String!
+}
+
+input DeleteCategoryInput {
+  id: String!
+}
+
+input SubCategoryInput {
+  name: String!
+  description: String!
+  category_id: String!
+}
+
+input DeleteSubCategoryInput {
+  id: String!
+}
+
+type Mutation {
+  createCategory(input: CategoryInput!): Category!
+  removeCategory(input: DeleteCategoryInput!): Category!
+  createSubCategory(input: SubCategoryInput!): SubCategory!
+  removeSubCategory(input: DeleteSubCategoryInput!): SubCategory!
+}
+
+type Query {
+  categories: [Category!]!
+  category(id: String!): Category
+  subcategories(category_id: String!): [SubCategory!]!
+  subcategory(id: String!): SubCategory
+}

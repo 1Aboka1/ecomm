@@ -1,0 +1,33 @@
+type Product {
+  id: String!
+  name: String!
+  description: String!
+  summary: String!
+  cover: String!
+  sub_category_id: String!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
+}
+
+input ProductInput {
+  name: String!
+  description: String!
+  summary: String!
+  cover: String!
+  sub_category_id: String!
+}
+
+input DeleteProductInput {
+  id: String!
+}
+
+type Mutation {
+  createProduct(input: ProductInput!): Product!
+  removeProduct(input: DeleteProductInput!): Product!
+}
+
+type Query {
+  products(sub_category_id: String): [Product!]!
+  product(id: String!): Product
+}
