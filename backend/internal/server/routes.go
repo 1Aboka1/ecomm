@@ -1,28 +1,18 @@
 package server
 
 import (
-	"context"
-	"ecomm-backend/graph"
 	"ecomm-backend/internal/auth"
 	"ecomm-backend/internal/database"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/lru"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
-	"github.com/vektah/gqlparser/v2/ast"
 	"gorm.io/gorm"
 )
-
-
 
 var (
   appTimeout = time.Second * 10
@@ -32,33 +22,6 @@ var (
 
   db *gorm.DB
 )
-
-func graphqlHandler() gin.HandlerFunc {
-  h := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
-  h.AddTransport(transport.Options{})
-  h.AddTransport(transport.GET{})
-  h.AddTransport(transport.POST{})
-
-  h.SetQueryCache(lru.New[*ast.QueryDocument](1000))
-
-  h.Use(extension.Introspection{})
-  h.Use(extension.AutomaticPersistedQuery{
-    Cache: lru.New[string](100),
-  })
-  return func(c *gin.Context) {
-    ctx := context.WithValue(c.Request.Context(), "ginContextKey", c)
-    c.Request = c.Request.WithContext(ctx)
-
-    h.ServeHTTP(c.Writer, c.Request)
-  }
-}
-// Defining the Playground handler
-func playgroundHandler() gin.HandlerFunc {
-  h := playground.Handler("GraphQL", "/v1/graph/query")
-  return func(c *gin.Context) {
-    h.ServeHTTP(c.Writer, c.Request)
-  }
-}
 
 func (s *Server) RegisterRoutes() http.Handler {
   r := gin.Default()
@@ -92,7 +55,10 @@ func (s *Server) RegisterRoutes() http.Handler {
     {
       // TODO: need to find way to attach auth middleware to specific routes like cart etc.
         graphRoute := v1.Group("/graph")
-        graphRoute.POST("/query", graphqlHandler())
+        graphRoute.POST("/query_product", productGraphHandler())
+        graphRoute.POST("/query_cart", cartGraphHandler())
+        graphRoute.POST("/query_category", categoryGraphHandler())
+        graphRoute.POST("/query_sku_attribute", skuAttributeGraphHandler())
         graphRoute.GET("/", playgroundHandler())
     }
 

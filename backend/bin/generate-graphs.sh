@@ -1,5 +1,7 @@
 #!/usr/bin/env bash 
 
+# generates graphqls for each graph in "graphqls" folder
+
 for dir in graphqls/*/
 do
   dir=${dir%*/}

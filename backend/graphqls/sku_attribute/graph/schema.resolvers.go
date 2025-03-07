@@ -8,7 +8,6 @@ import (
 	"context"
 	"ecomm-backend/graphqls/sku_attribute/graph/model"
 	"ecomm-backend/internal/database"
-	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -83,7 +82,7 @@ func (r *queryResolver) ProductSku(ctx context.Context, id string) (*model.Produ
 
 // ProductSkus is the resolver for the product_skus field.
 func (r *queryResolver) ProductSkus(ctx context.Context, productID string) ([]*model.ProductSku, error) {
-  db := database.OrmDb
+	db := database.OrmDb
 	var skus []database.ProductSku
 
 	result := db.Where("product_id = ?", productID).Select("id", "sku", "created_at", "updated_at", "deleted_at", "price", "quantity").Find(&skus)
@@ -100,7 +99,7 @@ func (r *queryResolver) ProductSkus(ctx context.Context, productID string) ([]*m
 
 // SkusAttributes is the resolver for the skus_attributes field.
 func (r *queryResolver) SkusAttributes(ctx context.Context, productSkuID string) ([]*model.SkuAttribute, error) {
-  db := database.OrmDb
+	db := database.OrmDb
 	var skuAttributes []database.SkuAttributes
 
 	result := db.Where("product_sku_id = ?", productSkuID).Select("value", "product_attribute_id").Find(&skuAttributes)
