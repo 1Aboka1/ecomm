@@ -7,13 +7,19 @@ package graph
 import (
 	"context"
 	"ecomm-backend/graphqls/category/graph/model"
+	"ecomm-backend/graphqls/utils"
 	"ecomm-backend/internal/database"
+	"errors"
 
 	"github.com/google/uuid"
 )
 
 // CreateCategory is the resolver for the createCategory field.
 func (r *mutationResolver) CreateCategory(ctx context.Context, input model.CategoryInput) (*model.Category, error) {
+  if !utils.Authorizer(ctx, []uint{database.Admin}) {
+    return nil, errors.New("not authorized")
+  }
+
 	db := database.OrmDb
 	category := &database.Category{Name: input.Name, Description: input.Description}
 

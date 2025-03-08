@@ -1,13 +1,13 @@
 package server
 
 import (
-  "context"
-  "ecomm-backend/internal/auth"
-  "ecomm-backend/internal/database"
-  "net/http"
+	"context"
+	"ecomm-backend/internal/auth"
+	"ecomm-backend/internal/database"
+	"net/http"
 
-  "github.com/gin-contrib/sessions"
-  "github.com/gin-gonic/gin"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
 
@@ -32,7 +32,6 @@ func (s *Server) sendSMS(c *gin.Context) {
     c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
     return
   }
-
 
   c.JSON(http.StatusAccepted, gin.H{"success": "OTP sent successfully"})
 }
@@ -83,14 +82,14 @@ func (s *Server) signIn(c *gin.Context) {
   // check if session already exists
   session := sessions.Default(c)
   err := auth.RetrieveSession(session, &user)
-  if err != nil {
+  if err == nil {
     c.JSON(http.StatusOK, gin.H{"success": "session already exists"})
     return
   }
 
   IDClaims, err := auth.VerifyUser(c)
   if err != nil {
-    c.JSON(http.StatusBadRequest, gin.H{"error": err})
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
     return
   }
 
@@ -105,17 +104,17 @@ func (s *Server) signIn(c *gin.Context) {
 
   err = auth.CreateSession(session, &user)
   if err != nil {
-    c.JSON(http.StatusBadRequest, gin.H{"error": err})
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
     return
   }
-  c.JSON(http.StatusCreated, gin.H{"success": "session created"})
+  c.JSON(http.StatusOK, gin.H{"success": "session created"})
 }
 
 func (s *Server) signUp(c *gin.Context) {
   // check if user is verified
   IDClaims, err := auth.VerifyUser(c)
   if err != nil {
-    c.JSON(http.StatusBadRequest, gin.H{"error": err})
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
     return
   }
 

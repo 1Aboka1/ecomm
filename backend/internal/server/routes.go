@@ -30,7 +30,7 @@ func (s *Server) RegisterRoutes() http.Handler {
   db = database.OrmDb
 
   // init redis
-  store, _ := redis.NewStore(10, "tcp", "localhost:" + redisPort, "", []byte("secret"))
+  store, _ := redis.NewStore(10, "tcp", "127.0.0.1:" + redisPort, "", []byte("secret"))
   r.Use(sessions.Sessions("session0", store))
 
   r.Use(cors.New(cors.Config{
@@ -48,19 +48,22 @@ func (s *Server) RegisterRoutes() http.Handler {
     authRoute.Use(auth.AllowOnlyGuest)
     authRoute.POST("/send_otp", s.sendSMS)
     authRoute.POST("/verify_otp", s.verifySMS)
-        authRoute.POST("/sign_in", s.signIn)
-        authRoute.POST("/sign_up", s.signUp)
-    }
+    authRoute.POST("/sign_in", s.signIn)
+    authRoute.POST("/sign_up", s.signUp)
+  }
 
-    {
-      // TODO: need to find way to attach auth middleware to specific routes like cart etc.
-        graphRoute := v1.Group("/graph")
-        graphRoute.POST("/query_product", productGraphHandler())
-        graphRoute.POST("/query_cart", cartGraphHandler())
-        graphRoute.POST("/query_category", categoryGraphHandler())
-        graphRoute.POST("/query_sku_attribute", skuAttributeGraphHandler())
-        graphRoute.GET("/", playgroundHandler())
-    }
+  {
+    // TODO: need to find way to attach auth middleware to specific routes like cart etc.
+    graphRoute := v1.Group("/graph")
+    graphRoute.POST("/query_product", productGraphHandler())
+    graphRoute.POST("/query_cart", cartGraphHandler())
+    graphRoute.POST("/query_category", categoryGraphHandler())
+    graphRoute.POST("/query_sku_attribute", skuAttributeGraphHandler())
+    graphRoute.GET("/product", productPlaygroundHandler())
+    graphRoute.GET("/cart", cartPlaygroundHandler())
+    graphRoute.GET("/category", categoryPlaygroundHandler())
+    graphRoute.GET("/sku_attribute", skuAttributePlaygroundHandler())
+  }
 
-    return r
+  return r
 }

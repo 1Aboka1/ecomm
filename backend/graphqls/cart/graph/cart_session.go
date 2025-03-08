@@ -1,38 +1,12 @@
 package graph
 
 import (
-  "context"
+	"context"
 	"ecomm-backend/graphqls/cart/graph/model"
-  "errors"
+	"ecomm-backend/graphqls/utils"
 
-  "github.com/gin-contrib/sessions"
-  "github.com/gin-gonic/gin"
+	"github.com/gin-contrib/sessions"
 )
-
-func ctxToGinCtx(ctx context.Context) (*gin.Context, error) {
-  ginContext := ctx.Value("ginContextKey")
-	if ginContext == nil {
-		err := errors.New("could not retrieve gin.Context")
-		return nil, err
-	}
-
-	gc, ok := ginContext.(*gin.Context)
-	if !ok {
-		err := errors.New("gin.Context has wrong type")
-		return nil, err
-	}
-  return gc, nil
-}
-
-func getSession(ctx context.Context) (sessions.Session, error) {
-  c, err := ctxToGinCtx(ctx);
-  if err != nil {
-    return nil, err
-  }
-
-  session := sessions.Default(c)
-  return session, nil
-}
 
 func countCartTotal(cartItems []*model.CartItem) (sum int32) {
   sum = 0
@@ -55,7 +29,7 @@ func createCart(session sessions.Session) (*model.Cart, error) {
 }
 
 func RetrieveCart(ctx context.Context) (*model.Cart, error) {
-  session, err := getSession(ctx)
+  session, err := utils.GetSession(ctx)
   if err != nil {
     return nil, err
   }
@@ -86,7 +60,7 @@ func RetrieveCart(ctx context.Context) (*model.Cart, error) {
 }
 
 func ClearCart(ctx context.Context) (*model.Cart, error) {
-  session, err := getSession(ctx)
+  session, err := utils.GetSession(ctx)
   if err != nil {
     return nil, err
   }

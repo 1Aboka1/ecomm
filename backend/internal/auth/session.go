@@ -54,6 +54,9 @@ func RetrieveSession(session sessions.Session, user *database.User) error {
     if err != nil {
         return err
     }
+    if uuID.String() == "00000000-0000-0000-0000-000000000000" {
+      return errors.New("no user found in session")
+    }
     newUser.ID = uuID
     newUser.FirstName = firstName
     newUser.LastName = &lastName // is it ok?

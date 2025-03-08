@@ -1,3 +1,4 @@
+// TODO: DEFINITELY need to rewrite it
 package server
 
 import (
@@ -96,10 +97,31 @@ func skuAttributeGraphHandler() gin.HandlerFunc {
   }
 }
 
-// Defining the Playground handler
-func playgroundHandler() gin.HandlerFunc {
-  h := playground.Handler("GraphQL", "/v1/graph/query")
+func categoryPlaygroundHandler() gin.HandlerFunc {
+  h := playground.Handler("GraphQL", "/v1/graph/query_category")
   return func(c *gin.Context) {
     h.ServeHTTP(c.Writer, c.Request)
   }
 }
+
+func productPlaygroundHandler() gin.HandlerFunc {
+  h := playground.Handler("GraphQL", "/v1/graph/query_product")
+  return func(c *gin.Context) {
+    h.ServeHTTP(c.Writer, c.Request)
+  }
+}
+
+func cartPlaygroundHandler() gin.HandlerFunc {
+  h := playground.Handler("GraphQL", "/v1/graph/query_cart")
+  return func(c *gin.Context) {
+    h.ServeHTTP(c.Writer, c.Request)
+  }
+}
+
+func skuAttributePlaygroundHandler() gin.HandlerFunc {
+  h := playground.Handler("GraphQL", "/v1/graph/query_sku_attribute")
+  return func(c *gin.Context) {
+    h.ServeHTTP(c.Writer, c.Request)
+  }
+}
+
